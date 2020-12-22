@@ -209,7 +209,7 @@ public class ColorConverter {
         } catch (SecurityException | IllegalArgumentException ex) {
             plugin.logError(ex.getMessage());
         }
-        if (s.isEmpty()) {
+        if (s == null || s.isEmpty()) {
             plugin.logError("Invalid IRC color: " + ircColor);
         }
         return s;

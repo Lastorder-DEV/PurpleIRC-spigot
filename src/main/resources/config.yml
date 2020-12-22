@@ -389,7 +389,7 @@ game-color-map:
     UNDERLINE: UNDERLINE
     WHITE: WHITE
     YELLOW: YELLOW
-    ITALIC: ITALIC
+    ITALIC: ITALICS
 Debug: false
 # Ignore chat cancellation.
 ignore-chat-cancel: false
