@@ -201,7 +201,6 @@ public final class PurpleBot {
     public CaseInsensitiveMap<String> linkRequests;
     public CaseInsensitiveMap<Collection<String>> remotePlayers;
     public CaseInsensitiveMap<CaseInsensitiveMap<String>> remoteServerInfo;
-    private final List<LogTailer> tailers;
     private boolean tailerEnabled;
     private final List<String> tailerFiles;
     private String tailerRecipient;
@@ -283,7 +282,6 @@ public final class PurpleBot {
         this.remotePlayers = new CaseInsensitiveMap<>();
         this.remoteServerInfo = new CaseInsensitiveMap<>();
         this.ircPrivateMsgMap = new CaseInsensitiveMap<>();
-        this.tailers = new ArrayList<>();
         this.tailerFiles = new ArrayList<>();
         this.zncSender = plugin.getServer().getConsoleSender();
         config = new YamlConfiguration();
@@ -313,11 +311,6 @@ public final class PurpleBot {
     }
 
     public void buildBot(boolean reload) {
-        if (!tailers.isEmpty()) {
-            for (LogTailer tailer : tailers) {
-                tailer.stopTailer();
-            }
-        }
         Configuration.Builder configBuilder = new Configuration.Builder()
                 .setCapEnabled(sasl)
                 .setName(botNick)
@@ -396,23 +389,9 @@ public final class PurpleBot {
             plugin.logInfo("Auto-connect is disabled. To connect: /irc connect " + bot.getNick());
         }
         plugin.logDebug("Max line length: " + configBuilder.getMaxLineLength());
-        if (tailerEnabled && !tailerFiles.isEmpty() && !tailerRecipient.isEmpty()) {
-            for (String tailerFile : tailerFiles) {
-                LogTailer tailer = new LogTailer(this, plugin, tailerRecipient, tailerCtcp, tailerFile);
-                tailers.add(tailer);
-            }
-        }
     }
 
     protected void stopTailers() {
-        if (!tailers.isEmpty()) {
-            for (LogTailer tailer : tailers) {
-                if (tailer != null) {
-                    tailer.stopTailer();
-                }
-            }
-            tailers.clear();
-        }
     }
 
     private void addListeners() {

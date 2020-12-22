@@ -39,7 +39,6 @@ import com.cnaude.purpleirc.Utilities.RegexGlobber;
 import com.cnaude.purpleirc.Utilities.UpdateChecker;
 import com.google.common.base.Joiner;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -184,8 +183,6 @@ public class PurpleIRC extends JavaPlugin {
     final String PL_GRIEFPREVENTION = "GriefPrevention";
 
     List<String> hookList = new ArrayList<>();
-    public static final String PURPLETAG = RandomStringUtils.randomAlphanumeric(10) + "UHVycGxlSVJDCg==";
-    public static final String TOWNYTAG = RandomStringUtils.randomAlphanumeric(10) + "VG93bnlDaGF0Cg==";
     public static final String LINK_CMD = "PurpleIRC-Link:";
     public boolean overrideMsgCmd = false;
     public String smsgAlias = "/m";
