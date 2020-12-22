@@ -1429,8 +1429,8 @@ public final class PurpleBot {
             return;
         }
         for (String channelName : botChannels) {
-            if (hideQuitWhenVanished.get(channelName)) {
-                if (plugin.vanishHook.isVanished(player)) {
+            if (hideQuitWhenVanished.get(channelName) || message == null || message.isEmpty()) {
+                if (plugin.vanishHook.isVanished(player) || message == null || message.isEmpty()) {
                     continue;
                 }
             }

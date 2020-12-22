@@ -43,7 +43,7 @@ public class GamePlayerQuitListener implements Listener {
      *
      * @param event
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerQuitEvent(final PlayerQuitEvent event) {
         plugin.logDebug("onPlayerQuitEvent [" + plugin.quitDelay + "]: " + event.getPlayer().getName());
         if (plugin.kickedPlayers.contains(event.getPlayer().getName())) {
