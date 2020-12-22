@@ -75,7 +75,13 @@
             <version>16.17.0</version>
             <scope>provided</scope>
         </dependency>
-        
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.13</version>
+        </dependency>
+
         <!-- Testing only -->
         <dependency>
             <groupId>junit</groupId>
@@ -135,7 +141,7 @@
                             <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <includes>
-                                    <include>com.cnaude.pircbotx</include>                             
+                                    <include>org.pircbotx</include>
                                     <include>commons-codec</include>
                                 </includes>
                             </artifactSet>
