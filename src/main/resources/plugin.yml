@@ -25,6 +25,7 @@ softdepend:
 - VanishNoPacket
 - PlaceholderAPI
 - DiscordSRV
+- GriefPrevention
 commands:
     irc:
         description: Various irc commands

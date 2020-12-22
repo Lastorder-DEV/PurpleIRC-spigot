@@ -205,8 +205,8 @@ public class ColorConverter {
     private String getIrcColor(String ircColor) {
         String s = "";
         try {
-            s = (String) Colors.class.getField(ircColor.toUpperCase()).get(null);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            s = Colors.lookup(ircColor.toUpperCase());
+        } catch (SecurityException | IllegalArgumentException ex) {
             plugin.logError(ex.getMessage());
         }
         if (s.isEmpty()) {
