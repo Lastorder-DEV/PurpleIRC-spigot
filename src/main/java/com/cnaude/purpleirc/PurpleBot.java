@@ -18,7 +18,6 @@ package com.cnaude.purpleirc;
 
 import com.cnaude.purpleirc.Events.VentureChatEvent;
 import com.cnaude.purpleirc.IRCListeners.ActionListener;
-import com.cnaude.purpleirc.IRCListeners.AwayListener;
 import com.cnaude.purpleirc.IRCListeners.ConnectListener;
 import com.cnaude.purpleirc.IRCListeners.DisconnectListener;
 import com.cnaude.purpleirc.IRCListeners.JoinListener;
@@ -66,7 +65,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import me.botsko.prism.actionlibs.QueryParameters;
 import me.botsko.prism.events.BlockStateChange;
 import org.bukkit.Achievement;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -343,7 +341,7 @@ public final class PurpleBot {
                 .setRealName(botRealName)
                 .setMaxLineLength(ircMaxLineLength)
                 //.setAutoReconnect(autoConnect) // Why doesn't this work?
-                .setServer(botServer, botServerPort, botServerPass);
+                .addServer(botServer, botServerPort, botServerPass);
         //addAutoJoinChannels(configBuilder);
         for (ListenerAdapter ll : ircListeners) {
             configBuilder.addListener(ll);
@@ -436,7 +434,6 @@ public final class PurpleBot {
 
     private void addListeners() {
         ircListeners.add(new ActionListener(plugin, this));
-        ircListeners.add(new AwayListener(plugin, this));
         ircListeners.add(new ConnectListener(plugin, this));
         ircListeners.add(new DisconnectListener(plugin, this));
         ircListeners.add(new JoinListener(plugin, this));

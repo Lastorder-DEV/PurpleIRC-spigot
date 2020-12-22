@@ -17,12 +17,6 @@
 package com.cnaude.purpleirc;
 
 import com.cnaude.purpleirc.Events.IRCMessageEvent;
-import com.cnaude.purpleirc.GameListeners.AdminChatListener;
-import com.cnaude.purpleirc.GameListeners.CleverNotchListener;
-import com.cnaude.purpleirc.GameListeners.DeathMessagesListener;
-import com.cnaude.purpleirc.GameListeners.DeathMessagesPrimeListener;
-import com.cnaude.purpleirc.GameListeners.DynmapListener;
-import com.cnaude.purpleirc.GameListeners.EssentialsListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerChatListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerCommandPreprocessingListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerDeathListener;
@@ -33,48 +27,28 @@ import com.cnaude.purpleirc.GameListeners.GamePlayerPlayerAchievementAwardedList
 import com.cnaude.purpleirc.GameListeners.GamePlayerPlayerAdvancementDoneListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerQuitListener;
 import com.cnaude.purpleirc.GameListeners.GameServerCommandListener;
-import com.cnaude.purpleirc.GameListeners.HeroChatListener;
 import com.cnaude.purpleirc.GameListeners.IRCMessageListener;
-import com.cnaude.purpleirc.GameListeners.McMMOChatListener;
-import com.cnaude.purpleirc.GameListeners.VentureChatListener;
-import com.cnaude.purpleirc.GameListeners.NTheEndAgainListener;
-import com.cnaude.purpleirc.GameListeners.OreBroadcastListener;
-import com.cnaude.purpleirc.GameListeners.PrismListener;
-import com.cnaude.purpleirc.GameListeners.RedditStreamListener;
-import com.cnaude.purpleirc.GameListeners.ReportRTSListener;
-import com.cnaude.purpleirc.GameListeners.SimpleTicketManagerListener;
-import com.cnaude.purpleirc.GameListeners.TitanChatListener;
-import com.cnaude.purpleirc.GameListeners.TownyChatListener;
-import com.cnaude.purpleirc.GameListeners.UltimateChatListener;
 import com.cnaude.purpleirc.GameListeners.VanishNoPacketListener;
-import com.cnaude.purpleirc.Hooks.AdminPrivateChatHook;
-import com.cnaude.purpleirc.Hooks.CommandBookHook;
-import com.cnaude.purpleirc.Hooks.DiscordSRVHook;
-import com.cnaude.purpleirc.Hooks.DynmapHook;
-import com.cnaude.purpleirc.Hooks.EssentialsHook;
-import com.cnaude.purpleirc.Hooks.FactionChatHook;
 import com.cnaude.purpleirc.Hooks.GriefPreventionHook;
-import com.cnaude.purpleirc.Hooks.HerochatHook;
-import com.cnaude.purpleirc.Hooks.JobsHook;
-import com.cnaude.purpleirc.Hooks.McMMOChatHook;
-import com.cnaude.purpleirc.Hooks.PlaceholderApiHook;
-import com.cnaude.purpleirc.Hooks.VentureChatHook;
-import com.cnaude.purpleirc.Hooks.ReportRTSHook;
-import com.cnaude.purpleirc.Hooks.ShortifyHook;
-import com.cnaude.purpleirc.Hooks.SuperVanishHook;
-import com.cnaude.purpleirc.Hooks.TownyChatHook;
 import com.cnaude.purpleirc.Hooks.VanishHook;
-import com.cnaude.purpleirc.Hooks.VaultHook;
 import com.cnaude.purpleirc.Utilities.CaseInsensitiveMap;
 import com.cnaude.purpleirc.Utilities.ChatTokenizer;
 import com.cnaude.purpleirc.Utilities.ColorConverter;
-import com.cnaude.purpleirc.Utilities.NetPackets;
+
 import com.cnaude.purpleirc.Utilities.Query;
 import com.cnaude.purpleirc.Utilities.RegexGlobber;
 import com.cnaude.purpleirc.Utilities.UpdateChecker;
 import com.google.common.base.Joiner;
-import com.onarandombox.MultiverseCore.api.MVPlugin;
-import com.onarandombox.MultiverseCore.api.MultiverseWorld;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.pircbotx.IdentServer;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -100,17 +74,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.pircbotx.IdentServer;
 
 /**
  *
@@ -200,21 +163,7 @@ public class PurpleIRC extends JavaPlugin {
     public ColorConverter colorConverter;
     public RegexGlobber regexGlobber;
     public CaseInsensitiveMap<PurpleBot> ircBots;
-    public FactionChatHook fcHook;
-    public TownyChatHook tcHook;
-    public VentureChatHook vcHook;
-    public DiscordSRVHook discHook;
-    public DynmapHook dynmapHook;
-    public JobsHook jobsHook;
-    public AdminPrivateChatHook adminPrivateChatHook;
     public GriefPreventionHook griefPreventionHook;
-    public ShortifyHook shortifyHook;
-    public ReportRTSHook reportRTSHook;
-    public CommandBookHook commandBookHook;
-    public McMMOChatHook mcMMOChatHook;
-    public PlaceholderApiHook placeholderApiHook;
-    public EssentialsHook essentialsChatHook;
-    public NetPackets netPackets;
     public CommandHandlers commandHandlers;
     public PurpleTabCompleter ircTabCompleter;
     private BotWatcher botWatcher;
@@ -226,43 +175,15 @@ public class PurpleIRC extends JavaPlugin {
     public UpdateChecker updateChecker;
     public ChatTokenizer tokenizer;
     private File heroConfigFile;
-    public VaultHook vaultHelpers;
     public VanishHook vanishHook;
-    public SuperVanishHook superVanishHook;
-    public HerochatHook herochatHook;
     private YamlConfiguration heroConfig;
     private final File cacheFile;
     private final File uuidCacheFile;
     public int reconnectSuppression;
 
-    public final String PL_ESSENTIALS = "Essentials";
-    final String PL_REPORTRTS = "ReportRTS";
-    final String PL_SIMPLETICKET = "SimpleTicketManager";
-    final String PL_NTHE_END_AGAIN = "NTheEndAgain";
-    final String PL_SUPERVANISH = "SuperVanish";
-    final String PL_PREMIUMVANISH = "PremiumVanish";
     final String PL_VANISHNOPACKET = "VanishNoPacket";
-    final String PL_OREBROADCAST = "OreBroadcast";
-    final String PL_DYNMAP = "dynmap";
-    final String PL_SHORTIFY = "Shortify";
-    final String PL_DEATHMESSAGES = "DeathMessages";
-    final String PL_DEATHMESSAGESPRIME = "DeathMessagesPrime";
-    final String PL_JOBS = "Jobs";
-    final String PL_COMMANDBOOK = "CommandBook";
-    final String PL_ADMINPRIVATECHAT = "AdminPrivateChat";
-    final String PL_FACTIONCHAT = "FactionChat";
-    final String PL_MCMMO = "mcMMO";
-    final String PL_CLEVERNOTCH = "CleverNotch";
-    final String PL_TOWNYCHAT = "TownyChat";
-    final String PL_REDDITSTREAM = "RedditStream";
-    final String PL_PRISM = "Prism";
-    final String PL_TITANCHAT = "TitanChat";
-    final String PL_VENTURECHAT = "VentureChat";
-    final String PL_HEROCHAT = "Herochat";
     final String PL_GRIEFPREVENTION = "GriefPrevention";
-    final String PL_PLACEHOLDERAPI = "PlaceholderAPI";
-    final String PL_DISCORDSRV = "DiscordSRV";
-    final String PL_UCHAT = "UltimateChat";
+
     List<String> hookList = new ArrayList<>();
     public static final String PURPLETAG = RandomStringUtils.randomAlphanumeric(10) + "UHVycGxlSVJDCg==";
     public static final String TOWNYTAG = RandomStringUtils.randomAlphanumeric(10) + "VG93bnlDaGF0Cg==";
@@ -275,7 +196,6 @@ public class PurpleIRC extends JavaPlugin {
     public PurpleIRC() {
         this.MAINCONFIG = "MAIN-CONFIG";
         this.sampleFileName = "SampleBot.yml";
-        this.netPackets = null;
         this.ircBots = new CaseInsensitiveMap<>();
         this.messageTmpl = new CaseInsensitiveMap<>();
         this.ircHeroChannelMessages = new CaseInsensitiveMap<>();
@@ -361,17 +281,6 @@ public class PurpleIRC extends JavaPlugin {
         channelWatcher = new ChannelWatcher(this);
         linkUpdater = new LinkUpdater(this);
         setupVault();
-        if (customTabList) {
-            if (checkForProtocolLib()) {
-                logInfo("Hooked into ProtocolLib! Custom tab list is enabled.");
-                netPackets = new NetPackets(this);
-            } else {
-                logError("ProtocolLib not found! The custom tab list is disabled.");
-                netPackets = null;
-            }
-        } else {
-            netPackets = null;
-        }
         botWatcher = new BotWatcher(this);
         ircMessageHandler = new IRCMessageHandler(this);
         commandQueue = new CommandQueueWatcher(this);
@@ -385,10 +294,6 @@ public class PurpleIRC extends JavaPlugin {
      */
     @Override
     public void onDisable() {
-        if (discHook != null) {
-            logDebug("Disabling discHook ...");
-            discHook.removeListener();
-        }
         if (channelWatcher != null) {
             logDebug("Disabling channelWatcher ...");
             channelWatcher.cancel();
@@ -847,14 +752,6 @@ public class PurpleIRC extends JavaPlugin {
      */
     public String getWorldAlias(String worldName) {
         String alias = worldName;
-        Plugin plugin = getServer().getPluginManager().getPlugin("Multiverse-Core");
-        if (plugin != null) {
-            MVPlugin mvPlugin = (MVPlugin) plugin;
-            MultiverseWorld world = mvPlugin.getCore().getMVWorldManager().getMVWorld(worldName);
-            if (world != null) {
-                alias = world.getAlias();
-            }
-        }
         if (alias == null) {
             alias = worldName;
         }
@@ -1045,13 +942,7 @@ public class PurpleIRC extends JavaPlugin {
      *
      */
     public void setupVault() {
-        if (getServer().getPluginManager().getPlugin("Vault") != null) {
-            vaultHelpers = new VaultHook(this);
-            String vv = getServer().getPluginManager().getPlugin("Vault").getDescription().getVersion();
-            logInfo("Hooked into Vault v" + vv);
-        } else {
-            logInfo("Not hooked into Vault!");
-        }
+
     }
 
     /**
@@ -1061,16 +952,6 @@ public class PurpleIRC extends JavaPlugin {
      */
     public String getPlayerGroup(Player player) {
         String groupName = "";
-        try {
-            if (vaultHelpers != null) {
-                if (vaultHelpers.permission != null && vaultHelpers.permission != null) {
-                    logDebug("getPlayerGroup: " + player.getName());
-                    groupName = vaultHelpers.permission.getPrimaryGroup(player);
-                }
-            }
-        } catch (Exception ex) {
-            logDebug("getPlayerGroup (" + player.getName() + "): " + ex.getMessage());
-        }
         if (groupName == null) {
             groupName = "";
         }
@@ -1099,15 +980,6 @@ public class PurpleIRC extends JavaPlugin {
         String groupName = "";
         try {
             UUID uuid = getPlayerUuid(player);
-            if (vaultHelpers != null && uuid != null) {
-                if (vaultHelpers.permission != null && vaultHelpers.permission != null) {
-                    OfflinePlayer offlinePlayer = getServer().getOfflinePlayer(uuid);
-                    if (offlinePlayer != null) {
-                        logDebug("getPlayerGroup: " + worldName + " " + player);
-                        groupName = vaultHelpers.permission.getPrimaryGroup(worldName, offlinePlayer);
-                    }
-                }
-            }
         } catch (Exception ex) {
             logDebug("getPlayerGroup (" + player + "): " + ex.getMessage());
         }
@@ -1124,11 +996,6 @@ public class PurpleIRC extends JavaPlugin {
      */
     public String getPlayerPrefix(Player player) {
         String prefix = "";
-        if (vaultHelpers != null) {
-            if (vaultHelpers.chat != null) {
-                prefix = vaultHelpers.chat.getPlayerPrefix(player);
-            }
-        }
         if (prefix == null) {
             prefix = "";
         }
@@ -1145,15 +1012,6 @@ public class PurpleIRC extends JavaPlugin {
         String prefix = "";
         try {
             UUID uuid = getPlayerUuid(player);
-            if (vaultHelpers != null && uuid != null) {
-                if (vaultHelpers.chat != null) {
-                    OfflinePlayer offlinePlayer = getServer().getOfflinePlayer(uuid);
-                    if (offlinePlayer != null) {
-                        logDebug("getPlayerPrefix: " + worldName + " " + player);
-                        prefix = vaultHelpers.chat.getPlayerPrefix(worldName, offlinePlayer);
-                    }
-                }
-            }
         } catch (Exception ex) {
             logDebug("getPlayerPrefix (" + player + "): " + ex.getMessage());
         }
@@ -1170,11 +1028,6 @@ public class PurpleIRC extends JavaPlugin {
      */
     public String getPlayerSuffix(Player player) {
         String suffix = "";
-        if (vaultHelpers != null) {
-            if (vaultHelpers.chat != null) {
-                suffix = vaultHelpers.chat.getPlayerSuffix(player);
-            }
-        }
         if (suffix == null) {
             suffix = "";
         }
@@ -1191,15 +1044,6 @@ public class PurpleIRC extends JavaPlugin {
         String suffix = "";
         try {
             UUID uuid = getPlayerUuid(player);
-            if (vaultHelpers != null && uuid != null) {
-                if (vaultHelpers.chat != null) {
-                    OfflinePlayer offlinePlayer = getServer().getOfflinePlayer(uuid);
-                    if (offlinePlayer != null) {
-                        logDebug("getPlayerSuffix: " + worldName + " " + offlinePlayer.getName());
-                        suffix = vaultHelpers.chat.getPlayerSuffix(worldName, offlinePlayer);
-                    }
-                }
-            }
         } catch (Exception ex) {
             logDebug("getPlayerSuffix (" + player + "): " + ex.getMessage());
         }
@@ -1277,20 +1121,6 @@ public class PurpleIRC extends JavaPlugin {
      */
     public String getGroupPrefix(Player player) {
         String prefix = "";
-        try {
-            if (vaultHelpers != null) {
-                if (vaultHelpers.chat != null && vaultHelpers.permission != null) {
-                    String group = vaultHelpers.permission.getPrimaryGroup(player);
-                    if (group == null) {
-                        group = "";
-                    }
-                    prefix = vaultHelpers.chat.getGroupPrefix(player.getLocation().getWorld(), group);
-                }
-            }
-        } catch (Exception ex) {
-            logDebug("getGroupPrefix (" + player.getName() + "): " + ex.getMessage());
-            return "";
-        }
         if (prefix == null) {
             prefix = "";
         }
@@ -1310,29 +1140,6 @@ public class PurpleIRC extends JavaPlugin {
             logDebug("getGroupPrefix: 2");
             UUID uuid = getPlayerUuid(player);
             logDebug("getGroupPrefix: 3");
-            if (vaultHelpers != null && uuid != null) {
-                logDebug("getGroupPrefix: 4");
-                if (vaultHelpers.chat != null && vaultHelpers.permission != null) {
-                    logDebug("getGroupPrefix: 5");
-                    String group = "";
-                    logDebug("getGroupPrefix: 6");
-                    OfflinePlayer offlinePlayer = getServer().getOfflinePlayer(uuid);
-                    logDebug("getGroupPrefix: 7");
-                    if (offlinePlayer != null) {
-                        logDebug("getGroupPrefix: 8");
-                        group = vaultHelpers.permission.getPrimaryGroup(worldName, offlinePlayer);
-                        logDebug("getGroupPrefix: 9");
-                    }
-                    logDebug("getGroupPrefix: 10");
-                    if (group == null) {
-                        logDebug("getGroupPrefix: 11");
-                        group = "";
-                    }
-                    logDebug("getGroupPrefix: 12");
-                    prefix = vaultHelpers.chat.getGroupPrefix(worldName, group);
-                    logDebug("getGroupPrefix: 13");
-                }
-            }
             if (prefix == null) {
                 prefix = "";
             }
@@ -1350,14 +1157,6 @@ public class PurpleIRC extends JavaPlugin {
      */
     public String getWorldColor(String worldName) {
         String color = worldName;
-        Plugin plugin = getServer().getPluginManager().getPlugin("Multiverse-Core");
-        if (plugin != null) {
-            MVPlugin mvPlugin = (MVPlugin) plugin;
-            MultiverseWorld world = mvPlugin.getCore().getMVWorldManager().getMVWorld(worldName);
-            if (world != null) {
-                color = world.getColor().toString();
-            }
-        }
         if (color == null) {
             color = worldName;
         }
@@ -1373,20 +1172,6 @@ public class PurpleIRC extends JavaPlugin {
      */
     public String getGroupSuffix(Player player) {
         String suffix = "";
-        if (vaultHelpers != null) {
-            if (vaultHelpers.chat != null && vaultHelpers.permission != null) {
-                String group = "";
-                try {
-                    group = vaultHelpers.permission.getPrimaryGroup(player);
-                } catch (Exception ex) {
-                    logDebug("Problem with primary group (" + player.getName() + "): " + ex.getMessage());
-                }
-                if (group == null) {
-                    group = "";
-                }
-                suffix = vaultHelpers.chat.getGroupSuffix(player.getLocation().getWorld(), group);
-            }
-        }
         if (suffix == null) {
             suffix = "";
         }
@@ -1402,21 +1187,6 @@ public class PurpleIRC extends JavaPlugin {
     public String getGroupSuffix(String worldName, String player) {
         String suffix = "";
         UUID uuid = getPlayerUuid(player);
-        if (vaultHelpers != null && uuid != null) {
-            if (vaultHelpers.chat != null && vaultHelpers.permission != null) {
-                String group = "";
-                OfflinePlayer offlinePlayer = getServer().getOfflinePlayer(uuid);
-                try {
-                    group = vaultHelpers.permission.getPrimaryGroup(worldName, offlinePlayer);
-                } catch (Exception ex) {
-                    logDebug("Problem with primary group (" + player + "): " + ex.getMessage());
-                }
-                if (group == null) {
-                    group = "";
-                }
-                suffix = vaultHelpers.chat.getGroupSuffix(worldName, group);
-            }
-        }
         if (suffix == null) {
             suffix = "";
         }
@@ -1575,23 +1345,7 @@ public class PurpleIRC extends JavaPlugin {
 
     private void detectHooks() {
         logInfo("Detecting plugin hooks...");
-        if (isPluginEnabled(PL_HEROCHAT)) {
-            hookList.add(hookFormat(PL_HEROCHAT, true));
-            getServer().getPluginManager().registerEvents(new HeroChatListener(this), this);
-            herochatHook = new HerochatHook(this);
-            heroConfig = new YamlConfiguration();
-            heroConfigFile = new File(getServer().getPluginManager()
-                    .getPlugin(PL_HEROCHAT).getDataFolder(), "config.yml");
-            try {
-                heroConfig.load(heroConfigFile);
-            } catch (IOException | InvalidConfigurationException ex) {
-                logError(ex.getMessage());
-            }
-            heroChatEmoteFormat = heroConfig.getString("format.emote", "");
-            heroPrivateChatFormat = heroConfig.getString("format.private-message");
-        } else {
-            hookList.add(hookFormat(PL_HEROCHAT, false));
-        }
+        vanishHook = new VanishHook(this);
         if (isPluginEnabled(PL_GRIEFPREVENTION)) {
             Class cls = null;
             boolean hooked = false;
@@ -1616,194 +1370,11 @@ public class PurpleIRC extends JavaPlugin {
         } else {
             hookList.add(hookFormat(PL_GRIEFPREVENTION, false));
         }
-        if (isPluginEnabled(PL_TITANCHAT)) {
-            hookList.add(hookFormat(PL_TITANCHAT, true));
-            getServer().getPluginManager().registerEvents(new TitanChatListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_TITANCHAT, false));
-        }
-        if (isPluginEnabled(PL_VENTURECHAT)) {
-            hookList.add(hookFormat(PL_VENTURECHAT, true));
-            ventureChatEnabled = true;
-            vcHook = new VentureChatHook(this);
-            getServer().getPluginManager().registerEvents(new VentureChatListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_VENTURECHAT, false));
-            ventureChatEnabled = false;
-            vcHook = null;
-        }
-        if (isPluginEnabled(PL_PRISM)) {
-            hookList.add(hookFormat(PL_PRISM, true));
-            getServer().getPluginManager().registerEvents(new PrismListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_PRISM, false));
-        }
-        if (isPluginEnabled(PL_REDDITSTREAM)) {
-            hookList.add(hookFormat(PL_REDDITSTREAM, true));
-            getServer().getPluginManager().registerEvents(new RedditStreamListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_REDDITSTREAM, false));
-        }
-        if (isPluginEnabled(PL_TOWNYCHAT)) {
-            hookList.add(hookFormat(PL_TOWNYCHAT, true));
-            getServer().getPluginManager().registerEvents(new TownyChatListener(this), this);
-            tcHook = new TownyChatHook(this);
-        } else {
-            hookList.add(hookFormat(PL_TOWNYCHAT, false));
-        }
-        if (isPluginEnabled(PL_CLEVERNOTCH)) {
-            hookList.add(hookFormat(PL_CLEVERNOTCH, true));
-            getServer().getPluginManager().registerEvents(new CleverNotchListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_CLEVERNOTCH, false));
-        }
-        if (isPluginEnabled(PL_MCMMO)) {
-            hookList.add(hookFormat(PL_MCMMO, true));
-            getServer().getPluginManager().registerEvents(new McMMOChatListener(this), this);
-            mcMMOChatHook = new McMMOChatHook(this);
-        } else {
-            hookList.add(hookFormat(PL_MCMMO, false));
-        }
-        if (isFactionsEnabled()) {
-            if (isPluginEnabled(PL_FACTIONCHAT)) {
-                String factionChatVersion = getServer().getPluginManager().getPlugin(PL_FACTIONCHAT).getDescription().getVersion();
-                if (factionChatVersion.startsWith("1.7")) {
-                    logError(PL_FACTIONCHAT + " v" + factionChatVersion + " not supported. Please install 1.8 or newer.");
-                    hookList.add(hookFormat(PL_FACTIONCHAT, false));
-                } else {
-                    hookList.add(hookFormat(PL_FACTIONCHAT, true));
-                    fcHook = new FactionChatHook(this);
-                }
-            } else {
-                hookList.add(hookFormat(PL_FACTIONCHAT, false));
-            }
-        } else {
-            hookList.add(hookFormat(PL_FACTIONCHAT, false));
-        }
-        if (isPluginEnabled(PL_ADMINPRIVATECHAT)) {
-            if (getServer().getPluginManager().getPlugin(PL_ADMINPRIVATECHAT)
-                    .getDescription().getAuthors().contains("cnaude")) {
-                hookList.add(hookFormat(PL_ADMINPRIVATECHAT, true));
-                adminPrivateChatHook = new AdminPrivateChatHook(this);
-                getServer().getPluginManager().registerEvents(new AdminChatListener(this), this);
-            } else {
-                logError(PL_ADMINPRIVATECHAT + "Version not supported. Please use the latest version from http://jenkins.cnaude.org/job/AdminPrivateChat/");
-            }
-        } else {
-            hookList.add(hookFormat(PL_ADMINPRIVATECHAT, false));
-        }
-        if (isPluginEnabled(PL_COMMANDBOOK)) {
-            hookList.add(hookFormat(PL_COMMANDBOOK, true));
-            commandBookHook = new CommandBookHook(this);
-        } else {
-            hookList.add(hookFormat(PL_COMMANDBOOK, false));
-        }
-        if (isPluginEnabled(PL_JOBS)) {
-            hookList.add(hookFormat(PL_JOBS, true));
-            jobsHook = new JobsHook(this);
-        } else {
-            hookList.add(hookFormat(PL_JOBS, false));
-        }
-        if (isPluginEnabled(PL_DEATHMESSAGES)) {
-            hookList.add(hookFormat(PL_DEATHMESSAGES, true));
-            getServer().getPluginManager().registerEvents(new DeathMessagesListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_DEATHMESSAGES, false));
-        }
-        if (isPluginEnabled(PL_DEATHMESSAGESPRIME)) {
-            hookList.add(hookFormat(PL_DEATHMESSAGESPRIME, true));
-            getServer().getPluginManager().registerEvents(new DeathMessagesPrimeListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_DEATHMESSAGESPRIME, false));
-        }
-        if (isPluginEnabled(PL_SHORTIFY)) {
-            String shortifyVersion = getServer().getPluginManager().getPlugin(PL_SHORTIFY).getDescription().getVersion();
-            if (shortifyVersion.startsWith("1.8")) {
-                hookList.add(hookFormat(PL_SHORTIFY, true));
-                shortifyHook = new ShortifyHook(this);
-            } else {
-                hookList.add(hookFormat(PL_SHORTIFY, false));
-                logError(PL_SHORTIFY + " v" + shortifyVersion + " not supported. Please use the latest version from http://jenkins.cnaude.org/job/Shortify/");
-            }
-        } else {
-            hookList.add(hookFormat(PL_SHORTIFY, false));
-        }
-        if (isPluginEnabled(PL_DYNMAP)) {
-            hookList.add(hookFormat(PL_DYNMAP, true));
-            getServer().getPluginManager().registerEvents(new DynmapListener(this), this);
-            dynmapHook = new DynmapHook(this);
-        } else {
-            hookList.add(hookFormat(PL_DYNMAP, false));
-        }
-        if (isPluginEnabled(PL_OREBROADCAST)) {
-            hookList.add(hookFormat(PL_OREBROADCAST, true));
-            getServer().getPluginManager().registerEvents(new OreBroadcastListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_OREBROADCAST, false));
-        }
-        vanishHook = new VanishHook(this);
         if (isPluginEnabled(PL_VANISHNOPACKET)) {
             hookList.add(hookFormat(PL_VANISHNOPACKET, true));
             getServer().getPluginManager().registerEvents(new VanishNoPacketListener(this), this);
         } else {
             hookList.add(hookFormat(PL_VANISHNOPACKET, false));
-        }
-        if (isPluginEnabled(PL_SUPERVANISH)) {
-            hookList.add(hookFormat(PL_SUPERVANISH, true));
-            superVanishHook = new SuperVanishHook(this);
-        } else {
-            hookList.add(hookFormat(PL_SUPERVANISH, false));
-        }
-        if (isPluginEnabled(PL_PREMIUMVANISH)) {
-            hookList.add(hookFormat(PL_PREMIUMVANISH, true));
-            superVanishHook = new SuperVanishHook(this);
-        } else {
-            hookList.add(hookFormat(PL_SUPERVANISH, false));
-        }
-        if (isPluginEnabled(PL_REPORTRTS)) {
-            hookList.add(hookFormat(PL_REPORTRTS, true));
-            getServer().getPluginManager().registerEvents(new ReportRTSListener(this), this);
-            reportRTSHook = new ReportRTSHook(this);
-        } else {
-            hookList.add(hookFormat(PL_REPORTRTS, false));
-        }
-        if (isPluginEnabled(PL_SIMPLETICKET)) {
-            hookList.add(hookFormat(PL_SIMPLETICKET, true));
-            getServer().getPluginManager().registerEvents(new SimpleTicketManagerListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_SIMPLETICKET, false));
-        }
-        if (isPluginEnabled(PL_NTHE_END_AGAIN)) {
-            hookList.add(hookFormat(PL_NTHE_END_AGAIN, true));
-            getServer().getPluginManager().registerEvents(new NTheEndAgainListener(this), this);
-        } else {
-            hookList.add(hookFormat(PL_NTHE_END_AGAIN, false));
-        }
-        if (isPluginEnabled(PL_ESSENTIALS)) {
-            hookList.add(hookFormat(PL_ESSENTIALS, true));
-            getServer().getPluginManager().registerEvents(new EssentialsListener(this), this);
-            essentialsChatHook = new EssentialsHook(this);
-        } else {
-            hookList.add(hookFormat(PL_ESSENTIALS, false));
-        }
-        if (isPluginEnabled(PL_PLACEHOLDERAPI)) {
-            hookList.add(hookFormat(PL_PLACEHOLDERAPI, true));
-            placeholderApiHook = new PlaceholderApiHook(this);
-        } else {
-            hookList.add(hookFormat(PL_PLACEHOLDERAPI, false));
-        }
-
-        if (isPluginEnabled(PL_DISCORDSRV)) {
-            discHook = new DiscordSRVHook(this);
-            hookList.add(hookFormat(PL_DISCORDSRV, true));
-        } else {
-            hookList.add(hookFormat(PL_DISCORDSRV, false));
-        }
-        if (isPluginEnabled(PL_UCHAT)) {
-            getServer().getPluginManager().registerEvents(new UltimateChatListener(this), this);
-            hookList.add(hookFormat(PL_UCHAT, true));
-        } else {
-            hookList.add(hookFormat(PL_UCHAT, false));
         }
         Collections.sort(hookList);
     }

@@ -20,10 +20,6 @@ import com.cnaude.purpleirc.PlayerList;
 import com.cnaude.purpleirc.PurpleBot;
 import com.cnaude.purpleirc.PurpleIRC;
 import com.cnaude.purpleirc.TemplateName;
-import com.gmail.nossr50.util.player.UserManager;
-import com.nyancraft.reportrts.data.Ticket;
-import com.palmergames.bukkit.TownyChat.channels.Channel;
-import github.scarsz.discordsrv.DiscordSRV;
 import java.awt.Color;
 import java.util.Set;
 import java.util.UUID;
@@ -179,9 +175,6 @@ public class ChatTokenizer {
             tmpl = playerTokenizer(ircNick, template);
         }
         return plugin.colorConverter.ircColorsToGame(ircUserTokenizer(tmpl, user, ircBot)
-                .replace("%HEROCHANNEL%", heroChannel)
-                .replace("%HERONICK%", plugin.herochatHook.getHeroNick(heroChannel))
-                .replace("%HEROCOLOR%", plugin.herochatHook.getHeroColor(heroChannel))
                 .replace("%NICKPREFIX%", ircBot.getNickPrefix(user, channel))
                 .replace("%CHANNELPREFIX%", ircBot.getChannelPrefix(channel))
                 .replace("%CHANNEL%", channel.getName()));
@@ -268,7 +261,6 @@ public class ChatTokenizer {
      * @param channel
      * @param template
      * @param message
-     * @param channelManager
      * @param hChannel
      * @return
      */
@@ -277,12 +269,6 @@ public class ChatTokenizer {
         String heroNick = "";
         String heroColor = "";
         String tmpl;
-        if (!plugin.herochatHook.isValidChannel(hChannel)) {
-            plugin.logError("Herochat channel is invalid: " + hChannel);
-        } else {
-            heroNick = plugin.herochatHook.getHeroNick(hChannel);
-            heroColor = plugin.herochatHook.getHeroColor(hChannel);
-        }
         Player player = this.getPlayer(ircNick);
         if (player != null) {
             tmpl = playerTokenizer(player, template);
@@ -417,9 +403,6 @@ public class ChatTokenizer {
      */
     public String ircKickToHeroChatTokenizer(PurpleBot ircBot, User recipient, User kicker, String reason, org.pircbotx.Channel channel, String template, String hChannel) {
         return plugin.colorConverter.ircColorsToGame(ircUserTokenizer(template, recipient, kicker, ircBot)
-                .replace("%HEROCHANNEL%", hChannel)
-                .replace("%HERONICK%", plugin.herochatHook.getHeroNick(hChannel))
-                .replace("%HEROCOLOR%", plugin.herochatHook.getHeroColor(hChannel))
                 .replace("%NICKPREFIX%", ircBot.getNickPrefix(kicker, channel))
                 .replace("%CHANNELPREFIX%", ircBot.getChannelPrefix(channel))
                 .replace("%REASON%", reason)
@@ -476,52 +459,6 @@ public class ChatTokenizer {
     public String gameChatToIRCTokenizer(String pName, String template, String message) {
         return plugin.colorConverter.gameColorsToIrc(template
                 .replace("%NAME%", pName)
-                .replace("%MESSAGE%", plugin.colorConverter.gameColorsToIrc(message))
-                .replace("%RAWMESSAGE%", ChatColor.stripColor(message))
-        );
-    }
-
-    /**
-     * Game chat to IRC
-     *
-     * @param username
-     * @param nickname
-     * @param effectiveName
-     * @param color
-     * @param discordChannel
-     * @param template
-     *
-     * @param message
-     * @return
-     */
-    public String discordChatToIRCTokenizer(String template, String username, String nickname, String effectiveName, Color color, String discordChannel, String message) {
-        String hex = color != null ? Integer.toHexString(color.getRGB()).toUpperCase() : "99AAB5";
-        if (hex.length() == 8) {
-            hex = hex.substring(2);
-        }
-        if (nickname == null) {
-            nickname = "";
-        }
-        if (effectiveName == null) {
-            effectiveName = "";
-        }
-        String translatedColor = DiscordSRV.getPlugin().getColors().get(hex);
-        String colorCode;
-        try {
-            colorCode = ChatColor.translateAlternateColorCodes('&', translatedColor);
-        } catch (Exception ex) {
-            colorCode = "";
-            plugin.logDebug(ex.getMessage());
-        }
-        if (colorCode == null) {
-            colorCode = "";
-        }
-        return plugin.colorConverter.gameColorsToIrc(template
-                .replace("%NAME%", username)
-                .replace("%NICKNAME%", nickname)
-                .replace("%EFFNAME%", effectiveName)
-                .replace("%COLOR%", colorCode)
-                .replace("%CHANNEL%", discordChannel)
                 .replace("%MESSAGE%", plugin.colorConverter.gameColorsToIrc(message))
                 .replace("%RAWMESSAGE%", ChatColor.stripColor(message))
         );
@@ -592,29 +529,6 @@ public class ChatTokenizer {
     }
 
     /**
-     * Dynmap web chat to IRC
-     *
-     * @param source
-     * @param name
-     * @param template
-     * @param message
-     * @return
-     */
-    public String dynmapWebChatToIRCTokenizer(String source, String name,
-            String template, String message) {
-        if (message == null) {
-            message = "";
-        }
-
-        return plugin.colorConverter.gameColorsToIrc(
-                playerTokenizer(name, template)
-                        .replace("%SOURCE%", source)
-                        .replace("%MESSAGE%", message)
-                        .replace("%RAWMESSAGE%", ChatColor.stripColor(message))
-        );
-    }
-
-    /**
      * Game player AFK to IRC
      *
      * @param player
@@ -624,152 +538,6 @@ public class ChatTokenizer {
      */
     public String gamePlayerAFKTokenizer(Player player, String template) {
         return plugin.colorConverter.gameColorsToIrc(playerTokenizer(player, template));
-    }
-
-    /**
-     * mcMMO chat to IRC
-     *
-     * @param player
-     * @param template
-     *
-     * @param message
-     * @param partyName
-     * @return
-     */
-    public String mcMMOPartyChatToIRCTokenizer(Player player, String template, String message, String partyName) {
-        return mcMMOChatToIRCTokenizer(player, template, message)
-                .replace("%PARTY%", partyName);
-    }
-
-    /**
-     * mcMMO chat to IRC
-     *
-     * @param player
-     * @param template
-     * @param message
-     * @return
-     */
-    public String mcMMOChatToIRCTokenizer(Player player, String template, String message) {
-        int powerLevel = UserManager.getPlayer(player).getPowerLevel();
-        return gameChatToIRCTokenizer(player, template, message)
-                .replace("%POWERLEVEL%", Integer.toString(powerLevel));
-    }
-
-    /**
-     * FactionChat to IRC
-     *
-     * @param player
-     * @param botNick
-     * @param message
-     * @param chatTag
-     * @param chatMode
-     * @return
-     */
-    public String chatFactionTokenizer(Player player, String botNick, String message, String chatTag, String chatMode) {
-        String template;
-        switch (chatMode) {
-            case "public":
-                template = plugin.getMessageTemplate(botNick, "", TemplateName.FACTION_PUBLIC_CHAT);
-                break;
-            case "ally":
-                template = plugin.getMessageTemplate(botNick, "", TemplateName.FACTION_ALLY_CHAT);
-                break;
-            case "enemy":
-                template = plugin.getMessageTemplate(botNick, "", TemplateName.FACTION_ENEMY_CHAT);
-                break;
-            default:
-                return "";
-        }
-        return plugin.colorConverter.gameColorsToIrc(
-                gameChatToIRCTokenizer(player, template, message)
-                        .replace("%FACTIONTAG%", chatTag)
-                        .replace("%FACTIONMODE%", chatMode));
-    }
-
-    /**
-     * Herochat to IRC
-     *
-     * @param player
-     * @param message
-     * @param hColor
-     * @param hChannel
-     * @param hNick
-     * @param template
-     * @return
-     */
-    public String chatHeroTokenizer(Player player, String message, String hColor, String hChannel, String hNick, String template) {
-        return gameChatToIRCTokenizer(player, template, message)
-                .replace("%HEROCHANNEL%", hChannel)
-                .replace("%HERONICK%", hNick)
-                .replace("%HEROCOLOR%", plugin.colorConverter.gameColorsToIrc(hColor))
-                .replace("%CHANNEL%", hChannel);
-    }
-
-    /**
-     *
-     * @param player
-     * @param townyChannel
-     * @param message
-     * @param template
-     * @return
-     */
-    public String chatTownyChannelTokenizer(Player player, Channel townyChannel, String message, String template) {
-
-        return gameChatToIRCTokenizer(player, template, message)
-                .replace("%TOWNYCHANNEL%", ChatColor.translateAlternateColorCodes('&', townyChannel.getName()))
-                .replace("%TOWNYCHANNELTAG%", ChatColor.translateAlternateColorCodes('&', townyChannel.getChannelTag()))
-                .replace("%TOWNYMSGCOLOR%", ChatColor.translateAlternateColorCodes('&', townyChannel.getMessageColour()));
-    }
-
-    /**
-     * TitanChat to IRC
-     *
-     * @param player
-     * @param tChannel
-     * @param tColor
-     * @param message
-     * @param template
-     * @return
-     */
-    public String titanChatTokenizer(Player player, String tChannel, String tColor, String message, String template) {
-        return gameChatToIRCTokenizer(player, template, message)
-                .replace("%TITANCHANNEL%", tChannel)
-                .replace("%TITANCOLOR%", plugin.colorConverter.gameColorsToIrc(tColor))
-                .replace("%CHANNEL%", tChannel);
-    }
-
-    /**
-     * UltimateChat to IRC
-     *
-     * @param player
-     * @param uChannel
-     * @param uColor
-     * @param message
-     * @param template
-     * @return
-     */
-    public String ultimateChatTokenizer(Player player, String uChannel, String uColor, String message, String template) {
-        return gameChatToIRCTokenizer(player, template, message)
-                .replace("%UCHATCHANNEL%", uChannel)
-                .replace("%UCHATCOLOR%", plugin.colorConverter.gameColorsToIrc(uColor))
-                .replace("%CHANNEL%", uChannel);
-    }
-
-    /**
-     * VentureChat to IRC
-     *
-     * @param player
-     * @param vcChannel
-     * @param vcColor
-     * @param message
-     * @param template
-     * @return
-     */
-    public String ventureChatTokenizer(Player player, String vcChannel, String vcColor, String message, String template) {
-        return gameChatToIRCTokenizer(player, template, message)
-                .replace("%MVCHANNEL%", vcChannel)
-                .replace("%MVCOLOR%", plugin.colorConverter.gameColorsToIrc(vcColor))
-                .replace("%CHANNEL%", vcChannel);
     }
 
     /**
@@ -801,136 +569,6 @@ public class ChatTokenizer {
                         .replace("%MESSAGE%", message)
                         .replace("%RAWMESSAGE%", ChatColor.stripColor(message))
                         .replace("%REASON%", reason));
-    }
-
-    /**
-     * ReportRTS notifications to IRC
-     *
-     * @param pName
-     * @param template
-     * @param ticket
-     * @return
-     */
-    public String reportRTSTokenizer(String pName, String template, Ticket ticket) {
-        String message = ticket.getMessage();
-        String modName = ticket.getStaffName();
-        String displayModName = "";
-        String name = ticket.getName();
-        String world = ticket.getWorld();
-        String modComment = "";
-        if (!ticket.getComments().isEmpty()) {
-            modComment = ticket.getComments().last().getComment();
-        }
-        int id = ticket.getId();
-        if (message == null) {
-            message = "";
-        }
-        if (modName == null) {
-            modName = "";
-        } else {
-            Player player = this.getPlayer(modName);
-            if (player != null) {
-                displayModName = player.getDisplayName();
-            } else {
-                displayModName = modName;
-            }
-        }
-        if (name == null) {
-            name = "";
-        }
-        if (world == null) {
-            world = "";
-        }
-        if (modComment == null) {
-            modComment = "";
-        }
-        return plugin.colorConverter.gameColorsToIrc(playerTokenizer(pName, template)
-                .replace("%MESSAGE%", message)
-                .replace("%RAWMESSAGE%", ChatColor.stripColor(message))
-                .replace("%MODNAME%", modName)
-                .replace("%DISPLAYMODNAME%", displayModName)
-                .replace("%MODCOMMENT%", modComment)
-                .replace("%TICKETNUMBER%", String.valueOf(id))
-                .replace("%RTSNAME%", name)
-                .replace("%RTSWORLD%", world));
-    }
-
-    /**
-     * SimpleTicketManager notifications to IRC
-     *
-     * @param uuid
-     * @param template
-     * @param ticket
-     * @return
-     */
-    public String simpleTicketTokenizer(UUID uuid, String template,
-            uk.co.joshuawoolley.simpleticketmanager.ticketsystem.Ticket ticket) {
-        Player player = Bukkit.getPlayer(uuid);
-        String playerName;
-        String displayName;
-        if (player == null) {
-            playerName = uuid.toString();
-            displayName = uuid.toString();
-        } else {
-            playerName = player.getName();
-            displayName = player.getCustomName();
-        }
-        String description = ticket.getDescription();
-        String reason = ticket.getReason();
-        String modUUID = ticket.getAssignedTo();
-        String modName;
-        String displayModName;
-        String name = ticket.getReportingPlayer();
-        String world = ticket.getWorld();
-        String modComment = "";
-        int id = ticket.getTicketId();
-        if (description == null) {
-            description = "";
-        }
-        Player modPlayer = null;
-        if (modUUID != null) {
-            modPlayer = Bukkit.getPlayer(UUID.fromString(modUUID));
-        }
-        if (modPlayer != null) {
-            modName = modPlayer.getName();
-            displayModName = modPlayer.getDisplayName();
-        } else {
-            modName = modUUID;
-            displayModName = modName;
-        }
-        if (name == null) {
-            name = "";
-        }
-        if (world == null) {
-            world = "";
-        }
-        if (modName == null) {
-            modName = "";
-        }
-        if (displayModName == null) {
-            displayModName = "";
-        }
-        return plugin.colorConverter.gameColorsToIrc(playerTokenizer(playerName, template)
-                .replace("%MESSAGE%", description)
-                .replace("%MODNAME%", modName)
-                .replace("%DISPLAYMODNAME%", displayModName)
-                .replace("%MODCOMMENT%", modComment)
-                .replace("%TICKETNUMBER%", String.valueOf(id))
-                .replace("%NAME%", name)
-                .replace("%DISPLAYNAME%", displayName)
-                .replace("%REASON%", reason)
-                .replace("%WORLD%", world));
-    }
-
-    /**
-     *
-     * @param sender
-     * @param message
-     * @param template
-     * @return
-     */
-    public String reportRTSTokenizer(CommandSender sender, String message, String template) {
-        return gameChatToIRCTokenizer(sender.getName(), template, message);
     }
 
     /**
@@ -995,17 +633,8 @@ public class ChatTokenizer {
             worldAlias = plugin.getWorldAlias(worldName);
             worldColor = plugin.getWorldColor(worldName);
         }
-        if (message.contains("%JOBS%") || message.contains("%JOBSSHORT%")) {
-            if (plugin.jobsHook != null) {
-                job = plugin.jobsHook.getPlayerJob(player, false);
-                jobShort = plugin.jobsHook.getPlayerJob(player, true);
-            }
-        }
-        plugin.logDebug("[P]Raw message: " + message);
 
-        if (plugin.placeholderApiHook != null) {
-            message = plugin.placeholderApiHook.setPlaceholders(player, message);
-        }
+        plugin.logDebug("[P]Raw message: " + message);
 
         return message.replace("%DISPLAYNAME%", displayName)
                 .replace("%UUID%", uuid.toString())
@@ -1082,20 +711,6 @@ public class ChatTokenizer {
         plugin.logDebug("playerTokenizer: 13 ");
         if (group == null) {
             group = plugin.defaultPlayerGroup;
-        }
-        plugin.logDebug("playerTokenizer: 14 ");
-        if (player != null) {
-            uuid = player.getUniqueId().toString();
-            if (message.contains("%JOBS%") || message.contains("%JOBSSHORT%")) {
-                if (plugin.jobsHook != null) {
-                    job = plugin.jobsHook.getPlayerJob(player, false);
-                    jobShort = plugin.jobsHook.getPlayerJob(player, true);
-                }
-            }
-        }
-
-        if (plugin.placeholderApiHook != null) {
-            message = plugin.placeholderApiHook.setPlaceholders(player, message);
         }
 
         plugin.logDebug("[S]Raw message: " + message);
