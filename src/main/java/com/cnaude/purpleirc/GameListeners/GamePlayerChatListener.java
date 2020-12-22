@@ -48,30 +48,8 @@ public class GamePlayerChatListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
-        if (plugin.essentialsChatHook != null) {
-            if (plugin.essentialsChatHook.isMuted(event.getPlayer())) {
-                plugin.logDebug("Ignore chat message due to Essentials mute: " + event.getMessage());
-                return;
-            }
-        }
         String message = event.getMessage();
         plugin.logDebug("ChatFormat [" + event.isCancelled() + "]: " + event.getFormat());
-        if (message.startsWith(PurpleIRC.TOWNYTAG)) {
-            event.setMessage(message.replace(PurpleIRC.TOWNYTAG, ""));
-            plugin.logDebug("Ignoring due to TownyChat tag");
-            return;
-        }
-        event.setMessage(message.replace(PurpleIRC.TOWNYTAG, ""));
-        if (event.isCancelled() && !plugin.isPluginEnabled("FactionChat") && !plugin.ignoreChatCancel) {
-            plugin.logDebug("Ignore chat message due to event cancellation: " + event.getMessage());
-            return;
-        }
-        if (plugin.adminPrivateChatHook != null) {
-            if (event.isCancelled() && plugin.adminPrivateChatHook.ac.toggledPlayers.contains(event.getPlayer().getName())) {
-                plugin.logDebug("Ignore AdminChat message due to event cancellation: " + event.getMessage());
-                return;
-            }
-        }
         if (event.getPlayer().hasPermission("irc.message.gamechat")) {
             plugin.logDebug("Player " + event.getPlayer().getName() + " has permission irc.message.gamechat");
             for (PurpleBot ircBot : plugin.ircBots.values()) {

@@ -49,9 +49,6 @@ public class VanishNoPacketListener implements Listener {
         plugin.logDebug("onVanishFakeQuitEvent: " + event.getPlayer().getName());
         for (PurpleBot ircBot : plugin.ircBots.values()) {
             ircBot.gameFakeQuit(event.getPlayer(), event.getQuitMessage());
-            if (plugin.netPackets != null) {
-                plugin.netPackets.updateTabList(event.getPlayer());
-            }
         }
     }
 
@@ -69,9 +66,6 @@ public class VanishNoPacketListener implements Listener {
                 plugin.clearHostCache(event.getPlayer());
                 for (PurpleBot ircBot : plugin.ircBots.values()) {
                     ircBot.gameFakeJoin(event.getPlayer(), event.getJoinMessage());
-                    if (plugin.netPackets != null) {
-                        plugin.netPackets.updateTabList(event.getPlayer());
-                    }
                 }
                 plugin.updateDisplayNameCache(event.getPlayer());
                 plugin.updateUuidCache(event.getPlayer());

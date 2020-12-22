@@ -23,7 +23,6 @@ import com.cnaude.purpleirc.GameListeners.GamePlayerDeathListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerGameModeChangeListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerJoinListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerKickListener;
-import com.cnaude.purpleirc.GameListeners.GamePlayerPlayerAchievementAwardedListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerPlayerAdvancementDoneListener;
 import com.cnaude.purpleirc.GameListeners.GamePlayerQuitListener;
 import com.cnaude.purpleirc.GameListeners.GameServerCommandListener;
@@ -251,10 +250,7 @@ public class PurpleIRC extends JavaPlugin {
             if (x >= 12) {
                 logInfo("Registering GamePlayerPlayerAdvancementDoneListener because version >= 1.12");
                 getServer().getPluginManager().registerEvents(new GamePlayerPlayerAdvancementDoneListener(this), this);
-            } else {
-                logInfo("Registering GamePlayerPlayerAchievementAwardedListener because version < 1.12");
-                getServer().getPluginManager().registerEvents(new GamePlayerPlayerAchievementAwardedListener(this), this);
-            }            
+            }
         } else {
             logError("Pattern mismatch!: " + getServer().getVersion());
         }

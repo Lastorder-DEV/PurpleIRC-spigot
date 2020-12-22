@@ -183,9 +183,6 @@ public class IRCMessageHandler {
                             case "@ochat":
                                 ircBot.broadcastChat(user, channel, target, commandArgs, true, responseType);
                                 break;
-                            case "@hchat":
-                                ircBot.broadcastHeroChat(user, channel, target, commandArgs);
-                                break;
                             case "@motd":
                                 sendMessage(ircBot, target, plugin.getServerMotd(), responseType);
                                 break;
@@ -204,11 +201,6 @@ public class IRCMessageHandler {
                             case "@bukkit":
                                 sendMessage(ircBot, target, plugin.getServer().getBukkitVersion(), responseType);
                                 break;
-                            case "@rtsmb":
-                                if (plugin.reportRTSHook != null) {
-                                    plugin.reportRTSHook.modBroadcast(user.getNick(), commandArgs);
-                                }
-                                break;
                             case "@msg":
                                 ircBot.playerChat(user, channel, target, commandArgs);
                                 break;
@@ -221,17 +213,6 @@ public class IRCMessageHandler {
                                 break;
                             case "@query":
                                 sendMessage(ircBot, target, plugin.getRemotePlayers(commandArgs), responseType);
-                                break;
-                            case "@a":
-                                if (plugin.adminPrivateChatHook != null && commandArgs != null) {
-                                    String newMessage = ircBot.filterMessage(
-                                            plugin.tokenizer.ircChatToGameTokenizer(ircBot, user, channel, plugin.getMessageTemplate(ircBot.botNick, channelName, TemplateName.IRC_ADMIN_CHAT), commandArgs), channelName);
-                                    plugin.adminPrivateChatHook.sendMessage(newMessage, user.getNick());
-                                    String acResponse = plugin.tokenizer.msgChatResponseTokenizer(user.getNick(), target, commandArgs, plugin.getMessageTemplate(TemplateName.IRC_ADMIN_RESPONSE));
-                                    if (!acResponse.isEmpty()) {
-                                        sendMessage(ircBot, target, acResponse, responseType);
-                                    }
-                                }
                                 break;
                             default:
                                 if (commandArgs == null) {

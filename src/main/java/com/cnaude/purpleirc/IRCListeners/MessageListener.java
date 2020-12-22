@@ -57,14 +57,6 @@ public class MessageListener extends ListenerAdapter {
                 + " (" + channel.getMode() + ")] [nick: " + user.getNick()
                 + "] [message: " + message + "]");
         try {
-            if (plugin.shortifyHook != null && ircBot.isShortifyEnabled(channel.getName())) {
-                plugin.logDebug("Shortifying message (before): " + message);
-                message = plugin.shortifyHook.shorten(message);
-                plugin.logDebug("Shortifying message (after): " + message);
-            } else {
-                plugin.logDebug("Shortify: false");
-            }
-
             if (ircBot.isValidChannel(channel.getName())) {
                 plugin.ircMessageHandler.processMessage(ircBot, user, channel, message, false);
             } else {

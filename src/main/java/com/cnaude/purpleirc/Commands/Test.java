@@ -54,10 +54,6 @@ public class Test implements IRCCommandInterface {
     @Override
     public void dispatch(CommandSender sender, String[] args) {
         //irc test <username>
-        if (plugin.vaultHelpers == null) {
-            sender.sendMessage(ChatColor.RED + "Vault is no enabled!");
-            return;
-        }
         if (plugin.debugMode()) {
             if (args.length >= 2) {
                 String playername = args[1];

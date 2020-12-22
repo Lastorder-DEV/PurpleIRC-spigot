@@ -69,9 +69,6 @@ public class KickListener extends ListenerAdapter {
 
         if (ircBot.isValidChannel(channel.getName())) {
             ircBot.broadcastIRCKick(recipient, user, event.getReason(), channel);
-            if (plugin.netPackets != null) {
-                plugin.netPackets.remFromTabList(recipient.getNick());
-            }
         }
     }
 }

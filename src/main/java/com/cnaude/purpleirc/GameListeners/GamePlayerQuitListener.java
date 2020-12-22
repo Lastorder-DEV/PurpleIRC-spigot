@@ -58,9 +58,6 @@ public class GamePlayerQuitListener implements Listener {
             public void run() {
                 for (PurpleBot ircBot : plugin.ircBots.values()) {
                     ircBot.gameQuit(event.getPlayer(), event.getQuitMessage());
-                    if (plugin.netPackets != null) {
-                        plugin.netPackets.updateTabList(event.getPlayer());
-                    }
                     ircBot.sendRemotePlayerInfo();
                 }
             }

@@ -49,7 +49,7 @@ public class TopicListener extends ListenerAdapter {
     @Override
     public void onTopic(TopicEvent event) {
         Channel channel = event.getChannel();
-        User user = event.getUser();
+        User user = event.getBot().getUserBot();
         String oldTopic = event.getOldTopic();
         String topic = event.getTopic();
 

@@ -70,7 +70,7 @@ public class JoinListener extends ListenerAdapter {
             plugin.logInfo("Joining channel: " + channelName);
             plugin.logDebug("Setting channel modes: " + channelName + " => " + ircBot.channelModes.get(channel.getName()));
             channel.send().setMode(ircBot.channelModes.get(channelName));
-            ircBot.fixTopic(channel, channel.getTopic(), channel.getTopicSetter());
+            ircBot.fixTopic(channel, channel.getTopic(), channel.getTopicSetter().getNick());
             ircBot.updateNickList(channel);
             if (ircBot.msgOnJoin.containsKey(channelName) && ircBot.joinMsg.containsKey(channelName)) {
                 if (ircBot.msgOnJoin.get(channelName) && !ircBot.joinMsg.get(channelName).isEmpty()) {
@@ -78,9 +78,6 @@ public class JoinListener extends ListenerAdapter {
                     ircBot.asyncRawlineNow(ircBot.joinMsg.get(channelName));
                 }
             }
-        }
-        if (plugin.netPackets != null) {
-            plugin.netPackets.addToTabList(user.getNick(), ircBot, channel);
         }
     }
 }

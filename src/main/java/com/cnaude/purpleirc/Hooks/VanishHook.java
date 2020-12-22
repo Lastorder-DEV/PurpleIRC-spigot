@@ -42,23 +42,18 @@ public class VanishHook {
      * @return
      */
     public boolean isVanished(Player player) {
-        // Try SuperVanish first
-        if (plugin.superVanishHook != null) {
-            return plugin.superVanishHook.isVanished(player);
-        } else {
-            // Fallback to other Vanish
-            if (player.hasMetadata("vanished")) {
-                plugin.logDebug("Player " + player.getName() + " has vanished metadata" + player.getMetadata("vanished").get(0));
-                MetadataValue md = player.getMetadata("vanished").get(0);
-                if (md.asBoolean()) {
-                    plugin.logDebug("Player " + player.getName() + " is vanished.");
-                    return true;
-                } else {
-                    plugin.logDebug("Player " + player.getName() + " is NOT vanished.");
-                }
+        // Fallback to other Vanish
+        if (player.hasMetadata("vanished")) {
+            plugin.logDebug("Player " + player.getName() + " has vanished metadata" + player.getMetadata("vanished").get(0));
+            MetadataValue md = player.getMetadata("vanished").get(0);
+            if (md.asBoolean()) {
+                plugin.logDebug("Player " + player.getName() + " is vanished.");
+                return true;
             } else {
-                plugin.logDebug("Player " + player.getName() + " has NO vanished metadata.");
+                plugin.logDebug("Player " + player.getName() + " is NOT vanished.");
             }
+        } else {
+            plugin.logDebug("Player " + player.getName() + " has NO vanished metadata.");
         }
         return false;
     }

@@ -76,10 +76,9 @@
         
         <!-- VanishNoPacket -->
         <dependency>
-            <groupId>org.kitteh</groupId>
+            <groupId>com.github.TechFortress</groupId>
             <artifactId>VanishNoPacket</artifactId>
-            <version>3.19.1</version>
-            <scope>provided</scope>
+            <version>7d76923230</version>
         </dependency>
 
         <dependency>

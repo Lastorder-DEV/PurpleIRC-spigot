@@ -136,7 +136,7 @@ public class ColorConverter {
                         s = Colors.NORMAL;                        
                     }
                     break;
-                case Colors.ITALIC:
+                case Colors.ITALICS:
                     italic++;
                     if (italic % 2 == 0) {
                         s = Colors.NORMAL;                        
@@ -236,7 +236,7 @@ public class ColorConverter {
         ircColorMap.put(ChatColor.WHITE, Colors.WHITE);
         ircColorMap.put(ChatColor.RESET, Colors.NORMAL);
         //ircColorMap.put(ChatColor.ITALIC, Colors.REVERSE);
-        ircColorMap.put(ChatColor.ITALIC, Colors.ITALIC);
+        ircColorMap.put(ChatColor.ITALIC, Colors.ITALICS);
 
         gameColorMap.put(Colors.BLACK, ChatColor.BLACK);
         gameColorMap.put(Colors.BLUE, ChatColor.BLUE);
@@ -258,6 +258,6 @@ public class ColorConverter {
         gameColorMap.put(Colors.WHITE, ChatColor.WHITE);
         gameColorMap.put(Colors.YELLOW, ChatColor.YELLOW);
         //gameColorMap.put(Colors.REVERSE, ChatColor.ITALIC);
-        gameColorMap.put(Colors.ITALIC, ChatColor.ITALIC);
+        gameColorMap.put(Colors.ITALICS, ChatColor.ITALIC);
     }
 }

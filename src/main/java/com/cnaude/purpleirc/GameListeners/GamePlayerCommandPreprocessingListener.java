@@ -76,15 +76,6 @@ public class GamePlayerCommandPreprocessingListener implements Listener {
                 }
             }
         }
-        if (plugin.isPluginEnabled("Essentials")) {
-            if (cmd.equalsIgnoreCase("/helpop") || cmd.equalsIgnoreCase("/amsg") || cmd.equalsIgnoreCase("/ac")) {
-                if (!action.isEmpty()) {
-                    for (PurpleBot ircBot : plugin.ircBots.values()) {
-                        ircBot.essHelpOp(event.getPlayer(), action);
-                    }
-                }
-            }
-        }
         if (plugin.overrideMsgCmd) {
             if (cmd.equalsIgnoreCase(plugin.smsgAlias)) {
                 event.setCancelled(true);

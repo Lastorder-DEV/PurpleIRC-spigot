@@ -16,7 +16,6 @@
  */
 package com.cnaude.purpleirc;
 
-import com.cnaude.purpleirc.Events.VentureChatEvent;
 import com.cnaude.purpleirc.IRCListeners.ActionListener;
 import com.cnaude.purpleirc.IRCListeners.ConnectListener;
 import com.cnaude.purpleirc.IRCListeners.DisconnectListener;
@@ -34,42 +33,12 @@ import com.cnaude.purpleirc.IRCListeners.ServerResponseListener;
 import com.cnaude.purpleirc.IRCListeners.TopicListener;
 import com.cnaude.purpleirc.IRCListeners.WhoisListener;
 import com.cnaude.purpleirc.IRCMessage.Type;
-import static com.cnaude.purpleirc.IRCMessage.Type.CTCP;
-import static com.cnaude.purpleirc.IRCMessage.Type.MESSAGE;
-import static com.cnaude.purpleirc.IRCMessage.Type.NOTICE;
 import com.cnaude.purpleirc.Utilities.CaseInsensitiveMap;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSortedSet;
-import com.massivecraft.factions.entity.Faction;
-import com.massivecraft.factions.entity.MPlayer;
-import com.nyancraft.reportrts.data.Ticket;
-import com.titankingdoms.dev.titanchat.core.participant.Participant;
-import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import me.botsko.prism.actionlibs.QueryParameters;
-import me.botsko.prism.events.BlockStateChange;
-import org.bukkit.Achievement;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.advancement.Advancement;
-import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -84,6 +53,26 @@ import org.pircbotx.cap.SASLCapHandler;
 import org.pircbotx.cap.TLSCapHandler;
 import org.pircbotx.exception.IrcException;
 import org.pircbotx.hooks.ListenerAdapter;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static com.cnaude.purpleirc.IRCMessage.Type.CTCP;
+import static com.cnaude.purpleirc.IRCMessage.Type.MESSAGE;
+import static com.cnaude.purpleirc.IRCMessage.Type.NOTICE;
 
 /**
  *
@@ -341,13 +330,10 @@ public final class PurpleBot {
                 .setRealName(botRealName)
                 .setMaxLineLength(ircMaxLineLength)
                 //.setAutoReconnect(autoConnect) // Why doesn't this work?
-                .addServer(botServer, botServerPort, botServerPass);
+                .addServer(botServer, botServerPort);
         //addAutoJoinChannels(configBuilder);
         for (ListenerAdapter ll : ircListeners) {
             configBuilder.addListener(ll);
-        }
-        if (!ciphers.isEmpty()) {
-            configBuilder.setCiphers(ciphers);
         }
         if (!botIdentPassword.isEmpty()) {
             if (!reload) {
@@ -372,9 +358,6 @@ public final class PurpleBot {
                 socketFactory.trustAllCertificates();
             } else {
                 plugin.logInfo("Enabling SSL ...");
-            }
-            if (!ciphers.isEmpty()) {
-                socketFactory.setCiphers(ciphers);
             }
             configBuilder.setSocketFactory(socketFactory);
         }
@@ -1319,46 +1302,6 @@ public final class PurpleBot {
         }
         for (String channelName : botChannels) {
             if (isPlayerInValidWorld(player, channelName)) {
-                if (plugin.fcHook != null) {
-                    String playerChatMode;
-                    String playerFactionName;
-                    try {
-                        playerChatMode = plugin.fcHook.getChatMode(player);
-                    } catch (IllegalAccessError ex) {
-                        plugin.logDebug("FC Error: " + ex.getMessage());
-                        playerChatMode = "public";
-                    }
-                    try {
-                        playerFactionName = plugin.fcHook.getFactionName(player);
-                    } catch (IllegalAccessError ex) {
-                        plugin.logDebug("FC Error: " + ex.getMessage());
-                        playerFactionName = "unknown";
-                    }
-
-                    String chatName = "faction-" + playerChatMode.toLowerCase() + "-chat";
-                    plugin.logDebug("Faction [Player: " + player.getName()
-                            + "] [Tag: " + playerFactionName + "] [Mode: "
-                            + playerChatMode + "]");
-                    if (factionTagFilters.get(channelName).contains(playerFactionName)) {
-                        plugin.logDebug("Filtered out message due to tag filter.");
-                    } else {
-                        if (enabledMessages.get(channelName)
-                                .contains(chatName)) {
-                            asyncIRCMessage(channelName, plugin.tokenizer
-                                    .chatFactionTokenizer(player, botNick, message,
-                                            playerFactionName, playerChatMode));
-                        } else {
-                            plugin.logDebug("Player " + player.getName() + " is in chat mode \""
-                                    + playerChatMode + "\" but \"" + chatName + "\" is disabled.");
-                        }
-                    }
-                } else {
-                    plugin.logDebug("No Factions");
-                }
-                if (plugin.ventureChatEnabled) {
-                    plugin.logDebug("Calling VentureChatEvent: " + event.getMessage());
-                    plugin.getServer().getScheduler().runTask(plugin, () -> plugin.getServer().getPluginManager().callEvent(new VentureChatEvent(event, this, channelName)));                    
-                }
                 if (isMessageEnabled(channelName, TemplateName.GAME_CHAT)) {
                     asyncIRCMessage(channelName, plugin.tokenizer
                             .gameChatToIRCTokenizer(player, plugin.getMessageTemplate(botNick, channelName, TemplateName.GAME_CHAT), message));
@@ -1372,74 +1315,6 @@ public final class PurpleBot {
                 .replace("%COOLDOWN%", floodChecker.getCoolDown(player));
         if (!message.isEmpty()) {
             player.sendMessage(message);
-        }
-    }
-
-    /**
-     * Called from TitanChat listener
-     *
-     * @param participant
-     * @param tChannel
-     * @param tColor
-     * @param message
-     */
-    public void titanChat(Participant participant, String tChannel, String tColor, String message) {
-        if (!this.isConnected()) {
-            return;
-        }
-        Player player = plugin.getServer().getPlayer(participant.getName());
-        if (floodChecker.isSpam(player)) {
-            sendFloodWarning(player);
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (!isPlayerInValidWorld(player, channelName)) {
-                continue;
-            }
-            plugin.logDebug("TC Channel: " + tChannel);
-            if (isMessageEnabled(channelName, "titan-" + tChannel + "-chat")
-                    || isMessageEnabled(channelName, "titan-chat")) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .titanChatTokenizer(player, tChannel, tColor, message,
-                                plugin.getMessageTemplate(botNick, channelName, TemplateName.TITAN_CHAT)));
-            } else {
-                plugin.logDebug("Player " + player.getName() + " is in \""
-                        + tChannel + "\" but titan-" + tChannel + "-chat is disabled.");
-            }
-        }
-    }
-
-    /**
-     * Called from UltimateChat listener
-     *
-     * @param sender
-     * @param uChannel
-     * @param uColor
-     * @param message
-     */
-    public void ultimateChat(CommandSender sender, String uChannel, String uColor, String message) {
-        if (!this.isConnected()) {
-            return;
-        }
-        Player player = plugin.getServer().getPlayer(sender.getName());
-        if (floodChecker.isSpam(player)) {
-            sendFloodWarning(player);
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (!isPlayerInValidWorld(player, channelName)) {
-                continue;
-            }
-            plugin.logDebug("UC Channel: " + uChannel);
-            if (isMessageEnabled(channelName, "ultimatechat-" + uChannel + "-chat")
-                    || isMessageEnabled(channelName, TemplateName.ULTIMATE_CHAT)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .ultimateChatTokenizer(player, uChannel, uColor, message,
-                                plugin.getMessageTemplate(botNick, channelName, TemplateName.ULTIMATE_CHAT)));
-            } else {
-                plugin.logDebug("Player " + player.getName() + " is in \""
-                        + uChannel + "\" but ultimatechat-" + uChannel + "-chat is disabled.");
-            }
         }
     }
 
@@ -1458,143 +1333,6 @@ public final class PurpleBot {
             asyncIRCMessage(channelName, plugin.tokenizer
                     .gameChatToIRCTokenizer(player, plugin
                             .getMessageTemplate(botNick, channelName, TemplateName.GAME_SEND), message));
-        }
-    }
-
-    // Called from CleverEvent
-    /**
-     *
-     * @param cleverBotName
-     * @param message
-     */
-    public void cleverChat(String cleverBotName, String message) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, "clever-chat")) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .gameChatToIRCTokenizer(cleverBotName, plugin
-                                .getMessageTemplate(botNick, channelName, TemplateName.CLEVER_SEND), message));
-            }
-        }
-    }
-
-    // Called from AdminChatEvent
-    /**
-     *
-     * @param name
-     * @param message
-     * @param world
-     */
-    public void adminChat(String name, String message, String world) {
-        if (!this.isConnected() || world.isEmpty()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.GAME_ADMIN_CHAT)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .gameChatToIRCTokenizer(name, plugin.getMessageTemplate(botNick, channelName, TemplateName.GAME_ADMIN_CHAT), message)
-                        .replace("%WORLD%", world)
-                );
-            }
-        }
-    }
-
-    /**
-     * Called from Discord ProcessChatEvent
-     *
-     * @param username
-     * @param nickname
-     * @param discordChannel
-     * @param color
-     * @param effectiveName
-     * @param message
-     */
-    public void discordChat(String username, String nickname, String effectiveName, Color color, String discordChannel, String message) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.DISCORD_CHAT) || isMessageEnabled(channelName, "discord-" + discordChannel + "-chat")) {
-                String template = plugin.getMessageTemplate(botNick, channelName, TemplateName.DISCORD_CHAT);
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .discordChatToIRCTokenizer(template, username, nickname, effectiveName, color, discordChannel, message)
-                );
-            }
-        }
-    }
-
-    /**
-     * Called from SimpleTicketEvent
-     *
-     * @param uuid
-     * @param ticket
-     * @param botNick
-     * @param messageType
-     */
-    public void simpleTicketNotify(UUID uuid,
-            uk.co.joshuawoolley.simpleticketmanager.ticketsystem.Ticket ticket,
-            String botNick, String messageType) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, messageType)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .simpleTicketTokenizer(uuid, plugin
-                                .getMessageTemplate(botNick, channelName, messageType), ticket));
-            }
-        }
-    }
-
-    /**
-     * Called from ReportRTS event
-     *
-     * @param pName
-     * @param ticket
-     * @param botNick
-     * @param messageType
-     */
-    public void reportRTSNotify(String pName, Ticket ticket, String botNick, String messageType) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, messageType)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .reportRTSTokenizer(pName, plugin
-                                .getMessageTemplate(botNick, channelName, messageType), ticket));
-            }
-        }
-    }
-
-    public void reportRTSNotify(CommandSender sender, String message, String botNick, String messageType) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, messageType)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .reportRTSTokenizer(sender, message, plugin.getMessageTemplate(botNick, channelName, messageType)));
-            }
-        }
-    }
-
-    public void nTheEndNotify(String messages[], String botNick, String messageType) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String message : messages) {
-            for (String channelName : botChannels) {
-                if (isMessageEnabled(channelName, messageType)) {
-                    asyncIRCMessage(
-                            channelName,
-                            plugin.tokenizer.gameChatToIRCTokenizer(
-                                    plugin.getMessageTemplate(botNick, channelName, messageType),
-                                    message));
-                }
-            }
         }
     }
 
@@ -1657,67 +1395,6 @@ public final class PurpleBot {
 
     /**
      *
-     * @param player
-     * @param message
-     */
-    public void essHelpOp(Player player, String message) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.ESS_HELPOP)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .gameChatToIRCTokenizer(player, plugin
-                                .getMessageTemplate(botNick, channelName, TemplateName.ESS_HELPOP),
-                                ChatColor.translateAlternateColorCodes('&', message)));
-            }
-        }
-    }
-
-    /**
-     *
-     * @param player
-     * @param blockName
-     * @param oreName
-     * @param vein
-     * @param oreColor
-     * @param loc
-     */
-    public void gameOreBroadcast(Player player, String blockName, String oreName, ChatColor oreColor, Set<Block> vein, Location loc) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.ORE_BROADCAST)) {
-                asyncIRCMessage(channelName, plugin.tokenizer.oreBroadcastTokenizer(player, botNick, blockName, oreName, oreColor, vein, loc));
-            }
-        }
-    }
-
-    /**
-     *
-     * @param name
-     * @param message
-     * @param source
-     */
-    public void dynmapWebChat(String source, String name, String message) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            plugin.logDebug("dynmapWebChat: " + channelName);
-            if (isMessageEnabled(channelName, TemplateName.DYNMAP_WEB_CHAT)) {
-                plugin.logDebug("dynmapWebChat: sending message");
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .dynmapWebChatToIRCTokenizer(source, name, plugin
-                                .getMessageTemplate(botNick, channelName, TemplateName.DYNMAP_WEB_CHAT),
-                                ChatColor.translateAlternateColorCodes('&', message)));
-            }
-        }
-    }
-
-    /**
-     *
      * @param message
      */
     public void consoleBroadcast(String message) {
@@ -1730,23 +1407,6 @@ public final class PurpleBot {
                         .gameChatToIRCTokenizer(plugin
                                 .getMessageTemplate(botNick, channelName, TemplateName.BROADCAST_CONSOLE_MESSAGE),
                                 ChatColor.translateAlternateColorCodes('&', message)));
-            }
-        }
-    }
-
-    /**
-     *
-     * @param message
-     */
-    public void redditStreamBroadcast(String message) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.REDDIT_MESSAGES)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .gameChatToIRCTokenizer(plugin
-                                .getMessageTemplate(botNick, channelName, TemplateName.REDDIT_MESSAGES), message));
             }
         }
     }
@@ -1858,26 +1518,6 @@ public final class PurpleBot {
                 asyncIRCMessage(channelName, plugin.tokenizer
                         .gameChatToIRCTokenizer(player, plugin
                                 .getMessageTemplate(botNick, channelName, TemplateName.GAME_ADVANCEMENT), message));
-            }
-        }
-    }
-
-    /**
-     *
-     * @param player
-     * @param achievement
-     */
-    public void gameAchievement(Player player, Achievement achievement) {
-        if (!this.isConnected() || achievement == null || player == null) {
-            return;
-        }
-        String message = achievement.toString();
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.GAME_ACHIEVEMENT)
-                    && isPlayerInValidWorld(player, channelName)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .gameChatToIRCTokenizer(player, plugin
-                                .getMessageTemplate(botNick, channelName, TemplateName.GAME_ACHIEVEMENT), message));
             }
         }
     }
@@ -2577,9 +2217,6 @@ public final class PurpleBot {
                     //plugin.logDebug("O: " + name);
                     if (!users.contains(name)) {
                         plugin.logDebug("Removing " + name + " from list.");
-                        if (plugin.netPackets != null) {
-                            plugin.netPackets.remFromTabList(name);
-                        }
                     }
                 }
                 channelNicks.remove(channelName);
@@ -2778,81 +2415,6 @@ public final class PurpleBot {
         }
 
         /*
-         Send messages to Dynmap if enabled
-         */
-        if (plugin.dynmapHook != null) {
-            plugin.logDebug("Checking if " + TemplateName.IRC_DYNMAP_WEB_CHAT + " is enabled ...");
-            if (enabledMessages.get(channelName).contains(TemplateName.IRC_DYNMAP_WEB_CHAT)) {
-                plugin.logDebug("Yes, " + TemplateName.IRC_DYNMAP_WEB_CHAT + " is enabled...");
-                plugin.logDebug("broadcastChat [DW]: " + message);
-                String template = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_DYNMAP_WEB_CHAT);
-                String rawDWMessage = filterMessage(
-                        plugin.tokenizer.ircChatToGameTokenizer(this, user, channel, template, message), channelName);
-                String nickTmpl = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_DYNMAP_NICK);
-                String rawNick = nickTmpl.replace("%NICK%", user.getNick());
-                plugin.dynmapHook.sendMessage(rawNick, rawDWMessage);
-                messageSent = true;
-            } else {
-                plugin.logDebug("Nope, " + TemplateName.IRC_DYNMAP_WEB_CHAT + " is NOT enabled...");
-            }
-        }
-
-        /*
-         Send messages to TownyChat if enabled
-         */
-        if (plugin.tcHook != null) {
-            if (isMessageEnabled(channelName, TemplateName.IRC_TOWNY_CHAT)) {
-                if (townyChannel.containsKey(channelName)) {
-                    String tChannel = townyChannel.get(channelName);
-                    if (!tChannel.isEmpty()) {
-                        String tmpl = plugin.getIrcTownyChatTemplate(botNick, tChannel);
-                        plugin.logDebug("broadcastChat [TC]: " + tChannel + ": " + tmpl);
-                        String rawTCMessage = filterMessage(
-                                plugin.tokenizer.ircChatToTownyChatTokenizer(this, user, channel, tmpl, message, tChannel), channelName);
-                        plugin.tcHook.sendMessage(tChannel, rawTCMessage);
-                        messageSent = true;
-                    }
-                }
-            }
-        }
-
-        /*
-         Send messages to mcMMO if enabled
-         */
-        if (plugin.mcMMOChatHook != null) {
-            /*
-             Send to mcMMMO admin channel if enabled
-             */
-            if (isMessageEnabled(channelName, TemplateName.IRC_MCMMO_ADMIN_CHAT)) {
-                String tmpl = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_MCMMO_ADMIN_CHAT);
-                plugin.logDebug("broadcastChat [mcMMO:admin]: " + message);
-                String rawMcMMOMessage = filterMessage(
-                        plugin.tokenizer.ircChatToGameTokenizer(this, user, channel, tmpl, message), channelName);
-                plugin.mcMMOChatHook.sendAdminMessage(user.getNick(), rawMcMMOMessage);
-                messageSent = true;
-
-            }
-            /*
-             Send to specific mcMMMO party channel if enabled
-             */
-            for (String em : getEnabledMessages(channel.getName())) {
-                if (em.startsWith("irc-mcmmo-party-") && em.endsWith("-chat")) {
-                    if (isMessageEnabled(channelName, em)) {
-                        String party = em.replace("irc-mcmmo-party-", "").replace("-chat", "");
-                        if (!party.isEmpty()) {
-                            String tmpl = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_MCMMO_PARTY_CHAT);
-                            plugin.logDebug("broadcastChat [mcMMO:party]: " + party + " : " + message);
-                            String rawMcMMOMessage = filterMessage(
-                                    plugin.tokenizer.ircChatToGameTokenizer(this, user, channel, tmpl, message), channelName);
-                            plugin.mcMMOChatHook.sendPartyMessage(user.getNick(), party, rawMcMMOMessage);
-                            messageSent = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        /*
          Send messages to players if enabled
          */
         if (isMessageEnabled(channelName, TemplateName.IRC_CHAT) || override) {
@@ -2877,94 +2439,6 @@ public final class PurpleBot {
         }
 
         /*
-         Send messages to Herochat if enabled
-         */
-        if (isMessageEnabled(channelName, TemplateName.IRC_HERO_CHAT)) {
-            String hChannel = heroChannelMap.get(channelName);
-            String tmpl = plugin.getIrcHeroChatTemplate(botNick, hChannel);
-            plugin.logDebug("broadcastChat [HC]: " + hChannel + ": " + tmpl);
-            String rawHCMessage = filterMessage(
-                    plugin.tokenizer.ircChatToHeroChatTokenizer(this, user, channel, tmpl, message, hChannel), channelName);
-            if (!rawHCMessage.isEmpty()) {
-                if (!plugin.herochatHook.isValidChannel(hChannel)) {
-                    plugin.logError("Herochat channel is invalid: " + hChannel);
-                } else {
-                    plugin.herochatHook.sendHeroMessage(hChannel, rawHCMessage);
-                    messageSent = true;
-                    if (logIrcToHeroChat.containsKey(channelName)) {
-                        if (logIrcToHeroChat.get(channelName)) {
-                            plugin.getServer().getConsoleSender().sendMessage(rawHCMessage);
-                        }
-                    }
-                }
-            }
-        }
-
-        /*
-         Send messages to VentureChat if enabled
-         */
-        if (isMessageEnabled(channelName, TemplateName.IRC_VENTURE_CHAT) && plugin.ventureChatEnabled) {
-            String vcChannel = ventureChatChannel.get(channelName);
-            String vcTemplate = plugin.getIrcVentureChatTemplate(botNick, vcChannel);
-            plugin.logDebug("broadcastChat [VC]: " + vcChannel + ": " + vcTemplate);
-            String rawVcMessage = filterMessage(
-                    plugin.tokenizer.ircChatToVentureChatTokenizer(this, user, channel, vcTemplate, message, vcChannel), channelName);
-            if (!rawVcMessage.isEmpty()) {
-                plugin.vcHook.sendMessage(vcChannel, rawVcMessage);
-                messageSent = true;
-                if (logIrcToVentureChat.containsKey(channelName)) {
-                    if (logIrcToVentureChat.get(channelName)) {
-                        plugin.getServer().getConsoleSender().sendMessage(rawVcMessage);
-                    }
-                }
-            }
-        }
-
-        /*
-         Send messages to Essentials if enabled
-         */
-        if (plugin.isPluginEnabled("Essentials")) {
-            if (isMessageEnabled(channelName, TemplateName.IRC_ESS_HELPOP) || override) {
-                String newMessage = filterMessage(
-                        plugin.tokenizer.ircChatToGameTokenizer(this, user, channel, plugin.getMessageTemplate(
-                                botNick, channelName, TemplateName.IRC_ESS_HELPOP), message), channelName);
-                if (!newMessage.isEmpty()) {
-                    plugin.broadcastToGame(newMessage, channelName, "essentials.helpop.receive");
-                    messageSent = true;
-                }
-            }
-        }
-
-        /*
-         Send messages to AdminPrivateChat if enabled
-         */
-        if (plugin.adminPrivateChatHook != null) {
-            if (isMessageEnabled(channelName, TemplateName.IRC_ADMIN_CHAT) || override) {
-                String newMessage = filterMessage(
-                        plugin.tokenizer.ircChatToGameTokenizer(this, user, channel, plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_ADMIN_CHAT), message), channelName);
-                if (!newMessage.isEmpty()) {
-                    plugin.adminPrivateChatHook.sendMessage(newMessage, user.getNick());
-                    messageSent = true;
-                }
-            }
-        }
-
-        /*
-         Send messages to Discord if enabled
-         */
-        if (isMessageEnabled(channelName, TemplateName.IRC_DISCORD_CHAT) && plugin.discHook != null) {
-            String discordChannelName = discordChannel.get(channelName);
-            String discordTemplate = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_DISCORD_CHAT);
-            plugin.logDebug("broadcastChat [Discord]: " + discordChannelName + ": " + discordTemplate);
-            String rawDiscordMessage = filterMessage(
-                    plugin.tokenizer.ircChatToDiscordTokenizer(this, user, channel, discordTemplate, message, discordChannelName), channelName);
-            if (!rawDiscordMessage.isEmpty()) {
-                plugin.discHook.sendMessage(discordChannelName, rawDiscordMessage);
-                messageSent = true;
-            }
-        }
-
-        /*
          Notify IRC user that message was sent.
          */
         if (isMessageEnabled(channelName, TemplateName.IRC_CHAT_RESPONSE) && messageSent && target != null) {
@@ -2985,51 +2459,6 @@ public final class PurpleBot {
             }
         }
 
-    }
-
-    /**
-     * Broadcast chat messages from IRC to specific hero channel
-     *
-     * @param user
-     * @param channel
-     * @param target
-     * @param message
-     */
-    public void broadcastHeroChat(User user, org.pircbotx.Channel channel, String target, String message) {
-        String channelName = channel.getName();
-        if (message == null) {
-            plugin.logDebug("H: NULL MESSAGE");
-            asyncIRCMessage(target, "No channel specified!");
-            return;
-        }
-        if (message.contains(" ")) {
-            String hChannel;
-            String msg;
-            hChannel = message.split(" ", 2)[0];
-            msg = message.split(" ", 2)[1];
-            if (enabledMessages.get(channelName).contains(TemplateName.IRC_HERO_CHAT)) {
-                plugin.logDebug("Checking if " + hChannel + " is a valid hero channel...");
-                if (plugin.herochatHook.isValidChannel(hChannel)) {
-                    hChannel = plugin.herochatHook.getChannelName(hChannel);
-                    String template = plugin.getIrcHeroChatTemplate(botNick, hChannel);
-                    plugin.logDebug("T: " + template);
-                    String t = plugin.tokenizer.ircChatToHeroChatTokenizer(this, user, channel, template, msg, hChannel);
-                    plugin.logDebug("Sending message to" + hChannel + ":" + t);
-                    plugin.herochatHook.sendHeroMessage(hChannel, t);
-                    //plugin.logDebug("Channel format: " + Herochat.getChannelManager().getChannel(hChannel).getFormat());
-                    // Let the sender know the message was sent
-                    String responseTemplate = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_HCHAT_RESPONSE);
-                    if (!responseTemplate.isEmpty()) {
-                        asyncIRCMessage(target, plugin.tokenizer
-                                .targetChatResponseTokenizer(user.getNick(), hChannel, msg, responseTemplate));
-                    }
-                } else {
-                    asyncIRCMessage(target, "Hero channel \"" + hChannel + "\" does not exist!");
-                }
-            }
-        } else {
-            asyncIRCMessage(target, "No message specified.");
-        }
     }
 
     /**
@@ -3154,71 +2583,6 @@ public final class PurpleBot {
             plugin.logDebug("Ignoring action due to "
                     + TemplateName.IRC_ACTION + " is false");
         }
-
-        /*
-         Send IRC action messages to HeroChat if enabled
-         */
-        if (isMessageEnabled(channelName, TemplateName.IRC_HERO_ACTION)) {
-            String hChannel = heroChannelMap.get(channelName);
-            String tmpl = plugin.getIrcHeroActionTemplate(botNick, hChannel);
-            plugin.logDebug("broadcastChat [HA]: " + hChannel + ": " + tmpl);
-            String rawHCMessage = filterMessage(
-                    plugin.tokenizer.ircChatToHeroChatTokenizer(this, user, channel, tmpl, message, hChannel), channelName);
-            if (!rawHCMessage.isEmpty()) {
-                plugin.herochatHook.sendHeroMessage(hChannel, rawHCMessage);
-                if (logIrcToHeroChat.containsKey(channelName)) {
-                    if (logIrcToHeroChat.get(channelName)) {
-                        plugin.getServer().getConsoleSender().sendMessage(rawHCMessage);
-                    }
-                }
-            }
-        }
-
-        /*
-         Send IRC action messages to VentureChat if enabled
-         */
-        if (isMessageEnabled(channelName, TemplateName.IRC_VENTURE_ACTION) && plugin.ventureChatEnabled) {
-            String vcChannel = ventureChatChannel.get(channelName);
-            String vcTemplate = plugin.getIrcVentureChatActionTemplate(botNick, vcChannel);
-            plugin.logDebug("broadcastAction [VC]: " + vcChannel + ": " + vcTemplate);
-            String rawVcMessage = filterMessage(
-                    plugin.tokenizer.ircChatToVentureChatTokenizer(this, user, channel, vcTemplate, message, vcChannel), channelName);
-            if (!rawVcMessage.isEmpty()) {
-                plugin.vcHook.sendMessage(vcChannel, rawVcMessage);
-                if (logIrcToVentureChat.containsKey(channelName)) {
-                    if (logIrcToVentureChat.get(channelName)) {
-                        plugin.getServer().getConsoleSender().sendMessage(rawVcMessage);
-                    }
-                }
-            }
-        }
-
-        /*
-         Send IRC action messages to VentureChat if enabled
-         */
-        if (plugin.dynmapHook != null) {
-            if (isMessageEnabled(channelName, TemplateName.IRC_ACTION_DYNMAP_WEB_CHAT)) {
-                String template = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_ACTION_DYNMAP_WEB_CHAT);
-                String rawDWMessage = filterMessage(
-                        plugin.tokenizer.ircChatToGameTokenizer(this, user, channel, template, message), channelName);
-                plugin.dynmapHook.sendMessage(user.getNick(), rawDWMessage);
-            }
-        }
-
-        /*
-         Send IRC action messages to Discord if enabled
-         */
-        if (isMessageEnabled(channelName, TemplateName.IRC_DISCORD_ACTION) && plugin.discHook != null) {
-            String discordChannelName = discordChannel.get(channelName);
-            String discordTemplate = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_DISCORD_ACTION);
-            plugin.logDebug("broadcastAction [Discord]: " + discordChannelName + ": " + discordTemplate);
-            String rawDiscordMessage = filterMessage(
-                    plugin.tokenizer.ircChatToDiscordTokenizer(this, user, channel, discordTemplate, message, discordChannelName), channelName);
-            if (!rawDiscordMessage.isEmpty()) {
-                plugin.discHook.sendMessage(discordChannelName, rawDiscordMessage);
-            }
-        }
-
     }
 
     /**
@@ -3236,29 +2600,6 @@ public final class PurpleBot {
                             botNick, channelName, TemplateName.IRC_KICK)),
                     channelName,
                     getIrcMessagePermission(channelName, "kick"));
-        }
-
-        if (isMessageEnabled(channelName, TemplateName.IRC_HERO_KICK)) {
-            String hChannel = heroChannelMap.get(channelName);
-            String template = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_HERO_KICK);
-            String message = plugin.tokenizer.ircKickToHeroChatTokenizer(this, recipient, kicker, reason, channel, template, hChannel);
-            plugin.herochatHook.sendHeroMessage(hChannel, message);
-        }
-
-        // Broadcast kick message to VentureChat
-        if (isMessageEnabled(channelName, TemplateName.IRC_VENTURE_KICK) && plugin.ventureChatEnabled) {
-            String vcChannel = ventureChatChannel.get(channelName);
-            String vcTemplate = plugin.getMessageTemplate(botNick, vcChannel, TemplateName.IRC_VENTURE_KICK);
-            plugin.logDebug("broadcastIRCkick [VC]: " + vcChannel + ": " + vcTemplate);
-            String rawVcMessage = plugin.tokenizer.ircKickTokenizer(this, recipient, kicker, reason, channel, vcTemplate);
-            if (!rawVcMessage.isEmpty()) {
-                plugin.vcHook.sendMessage(vcChannel, rawVcMessage);
-                if (logIrcToVentureChat.containsKey(channelName)) {
-                    if (logIrcToVentureChat.get(channelName)) {
-                        plugin.getServer().getConsoleSender().sendMessage(rawVcMessage);
-                    }
-                }
-            }
         }
     }
 
@@ -3320,30 +2661,6 @@ public final class PurpleBot {
             plugin.logDebug("[broadcastIRCJoin] NOT broadcasting join message because irc-join is false.");
         }
 
-        // Broadcast join message to HeroChat
-        if (isMessageEnabled(channel, TemplateName.IRC_HERO_JOIN) && plugin.herochatHook != null) {
-            String hChannel = heroChannelMap.get(channelName);
-            String template = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_HERO_JOIN);
-            String message = plugin.tokenizer.ircChatToHeroChatTokenizer(this, user, channel, template, hChannel);
-            plugin.herochatHook.sendHeroMessage(heroChannelMap.get(channelName), message);
-        }
-
-        // Broadcast join message to VentureChat
-        if (isMessageEnabled(channelName, TemplateName.IRC_VENTURE_JOIN) && plugin.ventureChatEnabled) {
-            String vcChannel = ventureChatChannel.get(channelName);
-            String vcTemplate = plugin.getMessageTemplate(botNick, vcChannel, TemplateName.IRC_VENTURE_JOIN);
-            plugin.logDebug("broadcastIRCJoin [VC]: " + vcChannel + ": " + vcTemplate);
-            String rawVcMessage = plugin.tokenizer.chatIRCTokenizer(this, user, channel, vcTemplate);
-            if (!rawVcMessage.isEmpty()) {
-                plugin.vcHook.sendMessage(vcChannel, rawVcMessage);
-                if (logIrcToVentureChat.containsKey(channelName)) {
-                    if (logIrcToVentureChat.get(channelName)) {
-                        plugin.getServer().getConsoleSender().sendMessage(rawVcMessage);
-                    }
-                }
-            }
-        }
-
     }
 
     public void broadcastIRCPart(User user, org.pircbotx.Channel channel) {
@@ -3357,29 +2674,6 @@ public final class PurpleBot {
         } else {
             plugin.logDebug("[broadcastIRCPart] NOT broadcasting part message because "
                     + TemplateName.IRC_PART + " is false.");
-        }
-
-        if (isMessageEnabled(channel, TemplateName.IRC_HERO_PART)) {
-            String hChannel = heroChannelMap.get(channel.getName());
-            String template = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_HERO_PART);
-            String message = plugin.tokenizer.ircChatToHeroChatTokenizer(this, user, channel, template, hChannel);
-            plugin.herochatHook.sendHeroMessage(hChannel, message);
-        }
-
-        // Broadcast part message to VentureChat
-        if (isMessageEnabled(channelName, TemplateName.IRC_VENTURE_PART) && plugin.ventureChatEnabled) {
-            String vcChannel = ventureChatChannel.get(channelName);
-            String vcTemplate = plugin.getMessageTemplate(botNick, vcChannel, TemplateName.IRC_VENTURE_PART);
-            plugin.logDebug("broadcastIRCPart [VC]: " + vcChannel + ": " + vcTemplate);
-            String rawVcMessage = plugin.tokenizer.chatIRCTokenizer(this, user, channel, vcTemplate);
-            if (!rawVcMessage.isEmpty()) {
-                plugin.vcHook.sendMessage(vcChannel, rawVcMessage);
-                if (logIrcToVentureChat.containsKey(channelName)) {
-                    if (logIrcToVentureChat.get(channelName)) {
-                        plugin.getServer().getConsoleSender().sendMessage(rawVcMessage);
-                    }
-                }
-            }
         }
     }
 
@@ -3395,29 +2689,6 @@ public final class PurpleBot {
             plugin.logDebug("[broadcastIRCQuit] NOT broadcasting quit message because "
                     + TemplateName.IRC_QUIT + " is false.");
         }
-
-        if (isMessageEnabled(channel, TemplateName.IRC_HERO_QUIT)) {
-            String template = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_HERO_QUIT);
-            String message = plugin.tokenizer.ircChatToHeroChatTokenizer(this, user, channel, template, heroChannelMap.get(channel.getName()));
-            plugin.herochatHook.sendHeroMessage(heroChannelMap.get(channel.getName()), message);
-        }
-
-        // Broadcast part message to VentureChat
-        if (isMessageEnabled(channelName, TemplateName.IRC_VENTURE_QUIT) && plugin.ventureChatEnabled) {
-            String vcChannel = ventureChatChannel.get(channelName);
-            String vcTemplate = plugin.getMessageTemplate(botNick, vcChannel, TemplateName.IRC_VENTURE_QUIT);
-            plugin.logDebug("broadcastIRCQuit [VC]: " + vcChannel + ": " + vcTemplate);
-            String rawVcMessage = plugin.tokenizer.chatIRCTokenizer(this, user, channel, vcTemplate);
-            if (!rawVcMessage.isEmpty()) {
-                plugin.vcHook.sendMessage(vcChannel, rawVcMessage);
-                if (logIrcToVentureChat.containsKey(channelName)) {
-                    if (logIrcToVentureChat.get(channelName)) {
-                        plugin.getServer().getConsoleSender().sendMessage(rawVcMessage);
-                    }
-                }
-            }
-        }
-
     }
 
     /**
@@ -3435,29 +2706,6 @@ public final class PurpleBot {
                     this, user, channel, plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_TOPIC)),
                     channelName,
                     getIrcMessagePermission(channelName, "topic"));
-        }
-
-        if (isMessageEnabled(channel, TemplateName.IRC_HERO_TOPIC)) {
-            String hChannel = heroChannelMap.get(channel.getName());
-            String template = plugin.getMessageTemplate(botNick, channelName, TemplateName.IRC_HERO_TOPIC);
-            String message = plugin.tokenizer.ircChatToHeroChatTokenizer(this, user, channel, template, topic, hChannel);
-            plugin.herochatHook.sendHeroMessage(hChannel, message);
-        }
-
-        // Broadcast topic message to VentureChat
-        if (isMessageEnabled(channelName, TemplateName.IRC_VENTURE_TOPIC) && plugin.ventureChatEnabled) {
-            String vcChannel = ventureChatChannel.get(channelName);
-            String vcTemplate = plugin.getMessageTemplate(botNick, vcChannel, TemplateName.IRC_VENTURE_TOPIC);
-            plugin.logDebug("broadcastIRCTopic [VC]: " + vcChannel + ": " + vcTemplate);
-            String rawVcMessage = plugin.tokenizer.ircTopicToGameTokenizer(this, user, channel, vcTemplate, oldTopic, topic);
-            if (!rawVcMessage.isEmpty()) {
-                plugin.vcHook.sendMessage(vcChannel, rawVcMessage);
-                if (logIrcToVentureChat.containsKey(channelName)) {
-                    if (logIrcToVentureChat.get(channelName)) {
-                        plugin.getServer().getConsoleSender().sendMessage(rawVcMessage);
-                    }
-                }
-            }
         }
     }
 
@@ -3671,17 +2919,6 @@ public final class PurpleBot {
         }
     }
 
-    /**
-     *
-     * @param player
-     * @return
-     */
-    protected String getFactionName(Player player) {
-        MPlayer mPlayer = MPlayer.get(player);
-        Faction faction = mPlayer.getFaction();
-        return faction.getName();
-    }
-
     public boolean isConnected() {
         return connected;
     }
@@ -3727,182 +2964,6 @@ public final class PurpleBot {
 
     public String getFileName() {
         return fileName;
-    }
-
-    public String prismBlockStateChangeTokens(String message, ArrayList<BlockStateChange> blockStateChange) {
-        String X;
-        String Y;
-        String Z;
-        String origBlock;
-        String newBlock;
-        String blockWorld;
-        try {
-            blockWorld = String.valueOf(blockStateChange.get(0).getNewBlock().getWorld().getName());
-        } catch (Exception ex) {
-            plugin.logDebug(ex.getMessage());
-            blockWorld = "";
-        }
-        try {
-            origBlock = String.valueOf(blockStateChange.get(0).getOriginalBlock().getType().name());
-        } catch (Exception ex) {
-            plugin.logDebug(ex.getMessage());
-            origBlock = "";
-        }
-        try {
-            newBlock = String.valueOf(blockStateChange.get(0).getNewBlock().getType().name());
-        } catch (Exception ex) {
-            plugin.logDebug(ex.getMessage());
-            newBlock = "";
-        }
-        try {
-            X = String.valueOf(blockStateChange.get(0).getNewBlock().getX());
-            Y = String.valueOf(blockStateChange.get(0).getNewBlock().getY());
-            Z = String.valueOf(blockStateChange.get(0).getNewBlock().getZ());
-        } catch (Exception ex) {
-            plugin.logDebug(ex.getMessage());
-            X = "";
-            Y = "";
-            Z = "";
-        }
-        if (X == null) {
-            X = "";
-        }
-        if (Y == null) {
-            Y = "";
-        }
-        if (Z == null) {
-            Z = "";
-        }
-        if (blockWorld == null) {
-            blockWorld = null;
-        }
-        if (origBlock == null) {
-            origBlock = "";
-        }
-        if (newBlock == null) {
-            newBlock = "";
-        }
-        return message
-                .replace("%ORIGINALBLOCK%", origBlock)
-                .replace("%NEWBLOCK%", newBlock)
-                .replace("%X%", X)
-                .replace("%Y%", Y)
-                .replace("%Z%", Z)
-                .replace("%BLOCKWORLD%", blockWorld);
-    }
-
-    public void gamePrismRollback(Player player, QueryParameters queryParams, ArrayList<BlockStateChange> blockStateChange) {
-        if (!this.isConnected()) {
-            return;
-        }
-        String keyword = queryParams.getKeyword();
-        String sortDirection = queryParams.getSortDirection();
-        String worldName = queryParams.getWorld();
-        String id = String.valueOf(queryParams.getId());
-        String radius = String.valueOf(queryParams.getRadius());
-        if (keyword == null) {
-            keyword = "";
-        }
-        if (sortDirection == null) {
-            sortDirection = "";
-        }
-        if (worldName == null) {
-            worldName = "";
-        }
-        if (id == null) {
-            id = "";
-        }
-        if (radius == null) {
-            radius = "";
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.PRISM_ROLLBACK)) {
-                asyncIRCMessage(channelName, prismBlockStateChangeTokens(plugin.tokenizer
-                        .playerTokenizer(player, plugin.getMessageTemplate(botNick, channelName, TemplateName.PRISM_ROLLBACK))
-                        .replace("%COMMAND%", queryParams.getOriginalCommand())
-                        .replace("%KEYWORD%", keyword)
-                        .replace("%SORTDIRECTION%", sortDirection)
-                        .replace("%PARAMWORLD%", worldName)
-                        .replace("%ID%", id)
-                        .replace("%RADIUS%", radius), blockStateChange
-                ));
-            }
-        }
-    }
-
-    public void gamePrismRollback(String name, QueryParameters queryParams, ArrayList<BlockStateChange> blockStateChange) {
-        if (!this.isConnected()) {
-            return;
-        }
-        String keyword = queryParams.getKeyword();
-        String sortDirection = queryParams.getSortDirection();
-        String worldName = queryParams.getWorld();
-        String id = String.valueOf(queryParams.getId());
-        String radius = String.valueOf(queryParams.getRadius());
-        if (keyword == null) {
-            keyword = "";
-        }
-        if (sortDirection == null) {
-            sortDirection = "";
-        }
-        if (worldName == null) {
-            worldName = "";
-        }
-        if (id == null) {
-            id = "";
-        }
-        if (radius == null) {
-            radius = "";
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.PRISM_ROLLBACK)) {
-                asyncIRCMessage(channelName, prismBlockStateChangeTokens(plugin.tokenizer
-                        .gameChatToIRCTokenizer(name, plugin.getMessageTemplate(botNick, channelName, TemplateName.PRISM_ROLLBACK))
-                        .replace("%NAME%", name)
-                        .replace("%COMMAND%", queryParams.getOriginalCommand())
-                        .replace("%KEYWORD%", keyword)
-                        .replace("%SORTDIRECTION%", sortDirection)
-                        .replace("%PARAMWORLD%", worldName)
-                        .replace("%ID%", id)
-                        .replace("%RADIUS%", radius), blockStateChange
-                ));
-            }
-        }
-    }
-
-    public void gamePrismDrainOrExtinguish(String template, Player player, int radius, ArrayList<BlockStateChange> blockStateChange) {
-        if (!this.isConnected()) {
-            return;
-        }
-        String radiusStr = String.valueOf(radius);
-
-        if (radiusStr == null) {
-            radiusStr = "";
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, template)) {
-                asyncIRCMessage(channelName, prismBlockStateChangeTokens(plugin.tokenizer
-                        .playerTokenizer(player, plugin.getMessageTemplate(botNick, channelName, template))
-                        .replace("%RADIUS%", radiusStr), blockStateChange
-                ));
-            }
-        }
-    }
-
-    public void gamePrismCustom(Player player, String actionName, String message, String pluginName) {
-        if (!this.isConnected()) {
-            return;
-        }
-        for (String channelName : botChannels) {
-            if (isMessageEnabled(channelName, TemplateName.PRISM_CUSTOM)) {
-                asyncIRCMessage(channelName, plugin.tokenizer
-                        .playerTokenizer(player, plugin.getMessageTemplate(botNick, channelName, TemplateName.PRISM_CUSTOM))
-                        .replace("%ACTION%", actionName)
-                        .replace("%MESSAGE%", message)
-                        .replace("%PLUGIN%", pluginName)
-                );
-            }
-        }
     }
 
     /**

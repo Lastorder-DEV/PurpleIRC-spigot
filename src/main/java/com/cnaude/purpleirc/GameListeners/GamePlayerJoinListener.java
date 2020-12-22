@@ -56,9 +56,6 @@ public class GamePlayerJoinListener implements Listener {
                 plugin.clearHostCache(event.getPlayer());
                 for (PurpleBot ircBot : plugin.ircBots.values()) {
                     ircBot.gameJoin(event.getPlayer(), event.getJoinMessage());
-                    if (plugin.netPackets != null) {
-                        plugin.netPackets.updateTabList(event.getPlayer());
-                    }
                     ircBot.sendRemotePlayerInfo();
                 }
                 plugin.updateDisplayNameCache(event.getPlayer());
