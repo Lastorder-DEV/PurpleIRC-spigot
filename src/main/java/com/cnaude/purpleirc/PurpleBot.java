@@ -1430,7 +1430,7 @@ public final class PurpleBot {
         }
         for (String channelName : botChannels) {
             if (hideQuitWhenVanished.get(channelName) || message == null || message.isEmpty()) {
-                if (plugin.vanishHook.isVanished(player) || message == null || message.isEmpty()) {
+                if (message == null || message.isEmpty()) {
                     continue;
                 }
             }

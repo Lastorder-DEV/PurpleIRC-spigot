@@ -53,6 +53,8 @@ public class GamePlayerQuitListener implements Listener {
                     + " was in the recently kicked list. Not sending quit message.");
             return;
         }
+        if (plugin.vanishHook.isVanished(event.getPlayer())) //not really safe to run async in this case as the metadata is not set to be cached.
+            return;
         plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, new Runnable() {
             @Override
             public void run() {
