@@ -4,6 +4,7 @@ description: ${project.description}
 author: cnaude
 website: ${project.url}
 main: com.cnaude.purpleirc.PurpleIRC
+api-version: '1.17'
 softdepend:
 - Vault
 - Factions
