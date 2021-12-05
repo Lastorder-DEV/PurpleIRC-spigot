@@ -318,7 +318,7 @@ public final class PurpleBot {
                 .setAutoNickChange(true)
                 .setVersion(version)
                 .setCapEnabled(true)
-                .setMessageDelay(chatDelay)
+                .setMessageDelay(new StaticReadonlyDelay(chatDelay))
                 .setRealName(botRealName)
                 .setMaxLineLength(ircMaxLineLength)
                 //.setAutoReconnect(autoConnect) // Why doesn't this work?
@@ -2910,7 +2910,7 @@ public final class PurpleBot {
     }
 
     public long getMessageDelay() {
-        return bot.getConfiguration().getMessageDelay();
+        return bot.getConfiguration().getMessageDelay().getDelay();
     }
 
     public String getMotd() {
