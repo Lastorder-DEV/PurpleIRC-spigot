@@ -45,6 +45,27 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+             
+        <repository>
+            <id>cnaude-repo</id>
+            <url>https://repo.chrisnaude.com/</url>
+        </repository>
+        
+        <!-- DiscordSRV -->
+        <repository>
+            <id>Scarsz-Nexus</id>
+            <url>https://nexus.scarsz.me/content/groups/public/</url>
+        </repository>  
+        
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+        
+        <repository>
+            <id>dynmap</id>
+            <url>https://repo.mikeprimm.com/</url>
+        </repository>    
     </repositories>
     
     <dependencies>
