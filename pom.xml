@@ -37,11 +37,6 @@
         </repository>
 
         <repository>
-            <id>vnp-repo</id>
-            <url>httpS://repo.kitteh.org/content/groups/public/</url>
-        </repository>
-
-        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
