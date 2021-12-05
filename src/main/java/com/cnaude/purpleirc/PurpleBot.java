@@ -78,8 +78,6 @@ class StaticReadonlyDelay implements org.pircbotx.delay.Delay {
 	private long delay;
 	
 	public StaticReadonlyDelay( long delay) {
-		checkArgument(delay >= 0, "Delay may not be negative");
-		
 		this.delay = delay;
 	}
 
