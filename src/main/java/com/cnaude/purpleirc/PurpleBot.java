@@ -48,7 +48,6 @@ import org.pircbotx.Channel;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.User;
-import org.pircbotx.delay.StaticReadonlyDelay;
 import org.pircbotx.UtilSSLSocketFactory;
 import org.pircbotx.cap.SASLCapHandler;
 import org.pircbotx.cap.TLSCapHandler;
@@ -74,6 +73,21 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import static com.cnaude.purpleirc.IRCMessage.Type.CTCP;
 import static com.cnaude.purpleirc.IRCMessage.Type.MESSAGE;
 import static com.cnaude.purpleirc.IRCMessage.Type.NOTICE;
+
+public class StaticReadonlyDelay implements Delay {
+	private long delay;
+	
+	public StaticReadonlyDelay( long delay) {
+		checkArgument(delay >= 0, "Delay may not be negative");
+		
+		this.delay = delay;
+	}
+
+	@Override
+	public long getDelay() {
+		return delay;
+	}
+}
 
 /**
  *
