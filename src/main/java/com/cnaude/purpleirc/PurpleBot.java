@@ -381,10 +381,8 @@ public final class PurpleBot {
                 plugin.logError(ex.getMessage());
             }
         }
-        Configuration configuration = new Configuration.Builder()
-            .setFinger("TELK BAEEEEEEE")
-            .buildConfiguration();
-        bot = new PircBotX(configuration);
+        
+        bot = new PircBotX(configBuilder);
         if (autoConnect) {
             asyncConnect(reload);
         } else {
