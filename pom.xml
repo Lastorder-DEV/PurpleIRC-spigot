@@ -172,10 +172,6 @@
                             </filters>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.pircbotx</pattern>
-                                    <shadedPattern>com.cnaude.purpleirc.ext.org.pircbotx</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>org.apache.commons.lang3</pattern>
                                     <shadedPattern>com.cnaude.purpleirc.ext.org.apache.commons.lang3</shadedPattern>
                                 </relocation>
