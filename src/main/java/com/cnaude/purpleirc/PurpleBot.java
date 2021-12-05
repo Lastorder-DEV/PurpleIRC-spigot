@@ -74,7 +74,14 @@ import static com.cnaude.purpleirc.IRCMessage.Type.CTCP;
 import static com.cnaude.purpleirc.IRCMessage.Type.MESSAGE;
 import static com.cnaude.purpleirc.IRCMessage.Type.NOTICE;
 
-public class StaticReadonlyDelay implements Delay {
+interface Delay {
+	/**
+	 * @return the delay in milliseconds.  
+	 */
+	long getDelay();
+}
+
+class StaticReadonlyDelay implements Delay {
 	private long delay;
 	
 	public StaticReadonlyDelay( long delay) {
