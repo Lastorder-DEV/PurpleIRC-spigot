@@ -38,7 +38,7 @@
 
         <repository>
             <id>vnp-repo</id>
-            <url>http://repo.kitteh.org/content/groups/public/</url>
+            <url>httpS://repo.kitteh.org/content/groups/public/</url>
         </repository>
 
         <repository>
