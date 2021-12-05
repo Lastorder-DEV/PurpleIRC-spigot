@@ -73,10 +73,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.pircbotx</groupId>
-            <artifactId>pircbotx</artifactId>
-            <version>2.2</version>
-        </dependency>
+             <groupId>com.github.pircbotx</groupId>
+             <artifactId>pircbotx</artifactId>
+             <version>2.2</version>
+         </dependency>
         
         <!-- VanishNoPacket -->
         <dependency>
