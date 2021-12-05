@@ -74,14 +74,7 @@ import static com.cnaude.purpleirc.IRCMessage.Type.CTCP;
 import static com.cnaude.purpleirc.IRCMessage.Type.MESSAGE;
 import static com.cnaude.purpleirc.IRCMessage.Type.NOTICE;
 
-interface Delay {
-	/**
-	 * @return the delay in milliseconds.  
-	 */
-	long getDelay();
-}
-
-class StaticReadonlyDelay implements Delay {
+class StaticReadonlyDelay implements org.pircbotx.delay.Delay {
 	private long delay;
 	
 	public StaticReadonlyDelay( long delay) {
