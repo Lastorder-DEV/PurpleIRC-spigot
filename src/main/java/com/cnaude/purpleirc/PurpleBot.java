@@ -317,14 +317,12 @@ public final class PurpleBot {
                 .setLogin(botLogin)
                 .setAutoNickChange(true)
                 .setVersion(version)
-                .setFinger(finger)
                 .setCapEnabled(true)
                 .setMessageDelay(chatDelay)
                 .setRealName(botRealName)
                 .setMaxLineLength(ircMaxLineLength)
                 //.setAutoReconnect(autoConnect) // Why doesn't this work?
-                .addServer(botServer, botServerPort)
-                .buildConfiguration();
+                .addServer(botServer, botServerPort);
         //addAutoJoinChannels(configBuilder);
         for (ListenerAdapter ll : ircListeners) {
             configBuilder.addListener(ll);
@@ -383,7 +381,8 @@ public final class PurpleBot {
             }
         }
         
-        bot = new PircBotX(configBuilder);
+        Configuration configuration = configBuilder.buildConfiguration();
+        bot = new PircBotX(configuration);
         if (autoConnect) {
             asyncConnect(reload);
         } else {
