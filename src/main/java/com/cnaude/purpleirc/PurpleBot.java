@@ -323,7 +323,8 @@ public final class PurpleBot {
                 .setRealName(botRealName)
                 .setMaxLineLength(ircMaxLineLength)
                 //.setAutoReconnect(autoConnect) // Why doesn't this work?
-                .addServer(botServer, botServerPort);
+                .addServer(botServer, botServerPort)
+                .buildConfiguration();
         //addAutoJoinChannels(configBuilder);
         for (ListenerAdapter ll : ircListeners) {
             configBuilder.addListener(ll);
